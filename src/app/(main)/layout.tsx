@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'sileo';
 
-const Layout = ({ children }) => {
+const Layout = ({ children } : any) => {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
