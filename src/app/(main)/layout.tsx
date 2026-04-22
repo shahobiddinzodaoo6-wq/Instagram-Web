@@ -1,28 +1,36 @@
 "use client";
 
-import { redirect } from 'next/navigation';
+import { Sidebar } from '../../widgets/sidebar';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'sileo';
 
 const Layout = ({ children }) => {
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
-            redirect("/accounts/login");
+            router.push("/accounts/login");
+        } else {
+            setLoading(false);
         }
-        setLoading(false);
-    }, []);
+    }, [router]);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <div className="flex items-center justify-center h-screen font-sans">Loading...</div>;
 
     return (
-        <div>
-                  <Toaster position="top-right" />
-            {children}
+        <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 overflow-y-auto bg-white">
+                <Toaster position="top-right" />
+                <main className="min-h-full">
+                    {children}
+                </main>
+            </div>
         </div>
     );
 }
 
-export default Layout
+export default Layout;
