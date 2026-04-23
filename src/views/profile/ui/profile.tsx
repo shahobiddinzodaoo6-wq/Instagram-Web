@@ -29,6 +29,7 @@ const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('posts');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
     const [selectedReel, setSelectedReel] = useState<any>(null);
     const [isMuted, setIsMuted] = useState(false);
     const router = useRouter();
@@ -46,47 +47,30 @@ const Profile = () => {
     // 2. Fetch User Posts
     const { data: posts, isLoading: isPostsLoading } = useQuery({
         queryFn: async () => {
-            const res = await axiosRequest.get(`/Post/get-my-posts`);
+            const res = await axiosRequest.get(`Post/get-my-posts`);
             return res.data.data || res.data;
         },
         queryKey: ['user-posts'],
         enabled: activeTab === 'posts'
     });
 
-    // 3. Fetch User Reels
-    const { data: reels, isLoading: isReelsLoading } = useQuery({
+    // 4. Fetch Single Post Details
+    const { data: postDetails, isLoading: isPostLoading } = useQuery({
         queryFn: async () => {
-            const res = await axiosRequest.get(`/Post/get-my-reels`);
-            return res.data.data || res.data;
+            const { data } = await axiosRequest.get(`/Post/get-post-by-id?id=${selectedPostId}`);
+            return data.data;
         },
-        queryKey: ['user-reels'],
-        enabled: activeTab === 'reels'
+        queryKey: ['post-details', selectedPostId],
+        enabled: !!selectedPostId
     });
+
 
     const handleLogout = () => {
         localStorage.removeItem("token");
         router.push("/accounts/login");
     };
 
-    // Ensure video plays with sound when selected
-    useEffect(() => {
-        const playVideo = async () => {
-            if (selectedReel && videoRef.current) {
-                const video = videoRef.current;
-                video.muted = isMuted;
-                video.volume = 1;
-                
-                try {
-                    await video.play();
-                } catch (err) {
-                    console.log("Autoplay with sound might be blocked, trying muted...", err);
-                    video.muted = true;
-                    await video.play();
-                }
-            }
-        };
-        playVideo();
-    }, [selectedReel, isMuted]);
+
 
     if (isProfileLoading) return <div className="flex justify-center pt-20">Loading profile...</div>;
 
@@ -204,7 +188,11 @@ const Profile = () => {
                             <div className="col-span-3 text-center py-10">Loading posts...</div>
                         ) : posts?.length > 0 ? (
                             posts.map((post: any) => (
-                                <div key={post.postId || post.id} className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100">
+                                <div 
+                                    key={post.postId || post.id} 
+                                    onClick={() => setSelectedPostId(post.postId || post.id)}
+                                    className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100"
+                                >
                                     <img 
                                         src={post.images ? `${BASE_IMAGE_URL}${post.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=500&h=500&fit=crop"} 
                                         alt="" 
@@ -221,101 +209,114 @@ const Profile = () => {
                         )}
                     </div>
                 )}
-
-                {activeTab === 'reels' && (
-                    <div className="grid grid-cols-3 gap-1 md:gap-8">
-                        {isReelsLoading ? (
-                            <div className="col-span-3 text-center py-10">Loading reels...</div>
-                        ) : reels?.length > 0 ? (
-                            reels.map((reel: any) => (
-                                <div 
-                                    key={reel.postId || reel.id} 
-                                    onClick={() => setSelectedReel(reel)}
-                                    className="aspect-[9/16] relative group cursor-pointer overflow-hidden bg-gray-100"
-                                >
-                                    <video 
-                                        src={`${BASE_IMAGE_URL}${reel.images}`} 
-                                        className="w-full h-full object-cover"
-                                        muted
-                                        loop
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold">
-                                        <span className="flex items-center"><Play className="w-6 h-6 mr-1" /> {reel.postLikeCount || 0}</span>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="col-span-3 text-center py-20 text-gray-500">No reels yet</div>
-                        )}
-                    </div>
-                )}
             </div>
 
-            {/* Reels Modal */}
-            {selectedReel && (
-                <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center animate-in fade-in duration-300">
+            {/* Post Details Modal */}
+            {selectedPostId && (
+                <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
                     <button 
-                        onClick={() => setSelectedReel(null)}
+                        onClick={() => setSelectedPostId(null)}
                         className="absolute top-4 right-4 text-white hover:text-gray-300 z-[110]"
                     >
                         <X className="w-8 h-8" />
                     </button>
 
-                    <div className="relative h-[95vh] aspect-[9/16] bg-black rounded-lg overflow-hidden flex shadow-2xl">
-                        {/* Video Content */}
-                        <div className="flex-1 relative bg-zinc-900 flex items-center justify-center">
-                            <video 
-                                ref={videoRef}
-                                src={`${BASE_IMAGE_URL}${selectedReel.images}`} 
-                                className="h-full w-full object-contain cursor-pointer"
-                                loop
-                                playsInline
-                                controls
-                                onClick={(e) => {
-                                    if (e.currentTarget.paused) {
-                                        e.currentTarget.play();
-                                    } else {
-                                        e.currentTarget.pause();
-                                    }
-                                }}
+                    <div className="bg-white w-full max-w-[1200px] h-[90vh] flex flex-col md:flex-row rounded-sm overflow-hidden">
+                        {/* Post Image Container */}
+                        <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full">
+                            <img 
+                                src={postDetails?.images ? `${BASE_IMAGE_URL}${postDetails.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
+                                alt="" 
+                                className="max-h-full max-w-full object-contain"
                             />
+                        </div>
 
-                            {/* Mute/Unmute Toggle */}
-                            <button 
-                                onClick={() => setIsMuted(!isMuted)}
-                                className="absolute bottom-24 right-4 bg-black/40 p-2 rounded-full text-white hover:bg-black/60 transition-colors z-20"
-                            >
-                                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                            </button>
-
-                            {/* Overlay Info */}
-                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                                <div className="flex items-center space-x-3 mb-3">
-                                    <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
-                                        <img src={selectedReel.userImage ? `${BASE_IMAGE_URL}${selectedReel.userImage}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"} alt="" className="w-full h-full object-cover" />
+                        {/* Post Info & Comments */}
+                        <div className="flex-1 flex flex-col bg-white min-w-[335px]">
+                            {/* User Header */}
+                            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-100">
+                                        <img src={userData?.image ? `${BASE_IMAGE_URL}${userData.image}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"} alt="" className="w-full h-full object-cover" />
                                     </div>
-                                    <span className="font-bold text-white text-base">{selectedReel.userName}</span>
-                                    <button className="text-white border border-white/40 px-3 py-1 rounded-lg text-xs font-bold hover:bg-white/10 transition-colors">Follow</button>
+                                    <span className="font-bold text-sm text-gray-900">{userData?.userName}</span>
                                 </div>
-                                <p className="text-white text-sm mb-4 line-clamp-2 leading-relaxed">{selectedReel.content || selectedReel.title}</p>
-                                <div className="flex items-center space-x-2 text-white/80 text-xs">
-                                    <Music className="w-3 h-3 animate-pulse" />
-                                    <span>Original Audio • {selectedReel.userName}</span>
-                                </div>
+                                <button className="p-1 hover:bg-gray-50 rounded-full transition-colors"><MoreVertical className="w-5 h-5" /></button>
                             </div>
 
-                            {/* Side Actions */}
-                            <div className="absolute right-4 bottom-32 flex flex-col items-center space-y-6 text-white z-10">
-                                <div className="flex flex-col items-center space-y-1">
-                                    <button className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"><Heart className="w-8 h-8" /></button>
-                                    <span className="text-xs font-bold">{selectedReel.postLikeCount || 0}</span>
+                            {/* Comments Section */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                {isPostLoading ? (
+                                    <div className="flex justify-center py-10">Loading details...</div>
+                                ) : (
+                                    <>
+                                        {/* Post Caption */}
+                                        <div className="flex space-x-3">
+                                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                                <img src={userData?.image ? `${BASE_IMAGE_URL}${userData.image}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"} alt="" className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="text-sm">
+                                                <span className="font-bold mr-2">{userData?.userName}</span>
+                                                <span className="text-gray-800">{postDetails?.title || postDetails?.content || "No caption"}</span>
+                                                <div className="text-xs text-gray-500 mt-2">Just now</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Real Comments from API */}
+                                        {postDetails?.comments?.length > 0 ? (
+                                            postDetails.comments.map((comment: any) => (
+                                                <div key={comment.id} className="flex space-x-3">
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                                        <img src={comment.userImage ? `${BASE_IMAGE_URL}${comment.userImage}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"} alt="" className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="text-sm">
+                                                        <span className="font-bold mr-2">{comment.userName}</span>
+                                                        <span className="text-gray-800">{comment.comment}</span>
+                                                        <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                            <span>12h</span>
+                                                            <button className="font-bold">Reply</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="h-full flex flex-col items-center justify-center text-center space-y-2 py-10">
+                                                <div className="w-16 h-16 rounded-full border-2 border-gray-900 flex items-center justify-center">
+                                                    <MessageCircle className="w-8 h-8" />
+                                                </div>
+                                                <p className="font-bold text-xl">No comments yet.</p>
+                                                <p className="text-sm text-gray-500">Start the conversation.</p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Actions Area */}
+                            <div className="p-4 border-t border-gray-100">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-4">
+                                        <button className="hover:text-gray-500 transition-colors"><Heart className="w-6 h-6" /></button>
+                                        <button className="hover:text-gray-500 transition-colors"><MessageCircle className="w-6 h-6" /></button>
+                                        <button className="hover:text-gray-500 transition-colors"><Send className="w-6 h-6" /></button>
+                                    </div>
+                                    <button className="hover:text-gray-500 transition-colors"><Bookmark className="w-6 h-6" /></button>
                                 </div>
-                                <div className="flex flex-col items-center space-y-1">
-                                    <button className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"><MessageCircle className="w-8 h-8" /></button>
-                                    <span className="text-xs font-bold">{selectedReel.commentCount || 0}</span>
-                                </div>
-                                <button className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"><Send className="w-7 h-7" /></button>
-                                <button className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"><MoreVertical className="w-6 h-6" /></button>
+                                <div className="font-bold text-sm mb-1">{postDetails?.postLikeCount || 0} likes</div>
+                                <div className="text-[10px] text-gray-500 uppercase tracking-wide">April 23</div>
+                            </div>
+
+                            {/* Comment Input */}
+                            <div className="p-4 border-t border-gray-100 flex items-center space-x-3">
+                                <button className="hover:opacity-70">
+                                    <svg aria-label="Emoji" color="rgb(38, 38, 38)" fill="rgb(38, 38, 38)" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Emoji</title><path d="M15.83 10.997a1.167 1.167 0 1 0 1.167 1.17 1.167 1.167 0 0 0-1.167-1.17Zm-7.66 0a1.167 1.167 0 1 0 1.167 1.17 1.167 1.167 0 0 0-1.167-1.17Zm3.83 8.334a4.496 4.496 0 0 1-3.33-1.496 1 1 0 1 1 1.48-1.345 2.494 2.494 0 0 0 3.7 0 1 1 0 1 1 1.48 1.345 4.496 4.496 0 0 1-3.33 1.496ZM12 .503a11.5 11.5 0 1 0 11.5 11.5A11.513 11.513 0 0 0 12 .503Zm0 21a9.5 9.5 0 1 1 9.5-9.5 9.51 9.51 0 0 1-9.5 9.5Z"></path></svg>
+                                </button>
+                                <input 
+                                    type="text" 
+                                    placeholder="Add a comment..." 
+                                    className="flex-1 text-sm focus:outline-none placeholder-gray-500"
+                                />
+                                <button className="text-blue-500 font-bold text-sm hover:text-blue-700 disabled:opacity-50">Post</button>
                             </div>
                         </div>
                     </div>
