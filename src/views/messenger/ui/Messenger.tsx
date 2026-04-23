@@ -13,7 +13,7 @@ export const Messenger = () => {
   const [showInfo, setShowInfo] = useState(false);
 
   return (
-    <div className="flex h-[calc(100vh-0px)] w-full max-h-[750px] overflow-hidden border-l border-zinc-200 dark:border-zinc-800">
+    <div className="flex h-[calc(100vh-0px)] w-full max-h-[750px] overflow-hidden border-l border-zinc-200">
       <ChatList 
         onSelectChat={(chat) => {
           setSelectedChat(chat);

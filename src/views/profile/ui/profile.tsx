@@ -46,7 +46,7 @@ const Profile = () => {
     // 2. Fetch User Posts
     const { data: posts, isLoading: isPostsLoading } = useQuery({
         queryFn: async () => {
-            const res = await axiosRequest.get(`/Post/get-posts`);
+            const res = await axiosRequest.get(`/Post/get-my-posts`);
             return res.data.data || res.data;
         },
         queryKey: ['user-posts'],
@@ -56,7 +56,7 @@ const Profile = () => {
     // 3. Fetch User Reels
     const { data: reels, isLoading: isReelsLoading } = useQuery({
         queryFn: async () => {
-            const res = await axiosRequest.get(`/Post/get-reels`);
+            const res = await axiosRequest.get(`/Post/get-my-reels`);
             return res.data.data || res.data;
         },
         queryKey: ['user-reels'],

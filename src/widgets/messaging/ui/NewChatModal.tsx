@@ -39,9 +39,9 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center w-[100%] justify-center bg-black/60 transition-opacity">
-      <div className="bg-white dark:bg-[#262626] w-full max-w-[400px] rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-white w-full max-w-[400px] rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-200 shrink-0">
           <div className="w-8" />
           <h2 className="font-bold text-base">Новое сообщение</h2>
           <button onClick={onClose} className="p-1">
@@ -50,7 +50,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
         </div>
 
         {/* Search */}
-        <div className="px-4 py-2.5 flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
+        <div className="px-4 py-2.5 flex items-center gap-3 border-b border-zinc-200 shrink-0">
           <span className="font-semibold text-base">Кому:</span>
           <input
             type="text"
@@ -66,7 +66,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
         <div className="flex-1 overflow-y-auto min-h-[300px]">
           <div className="py-2">
             {!searchQuery && (
-              <h3 className="px-4 py-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">Рекомендуемые</h3>
+              <h3 className="px-4 py-2 text-sm font-semibold text-zinc-900">Рекомендуемые</h3>
             )}
             
             <div className="space-y-1">
@@ -78,11 +78,11 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
                 users?.map((user) => (
                   <div 
                     key={user.id} 
-                    className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group"
+                    className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-zinc-50 transition-colors group"
                     onClick={() => setSelectedUserId(user.id)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 shrink-0 border border-zinc-100 dark:border-zinc-800">
+                      <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 shrink-0 border border-zinc-100">
                         <img 
                           src={user.image ? `${urlImage}/${user.image}` : `https://i.pravatar.cc/150?u=${user.userName}`} 
                           alt={user.userName} 
@@ -90,7 +90,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
                         />
                       </div>
                       <div className="flex flex-col overflow-hidden">
-                        <p className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">{user.userName}</p>
+                        <p className="font-semibold text-sm text-zinc-900 truncate">{user.userName}</p>
                         <p className="text-zinc-500 text-sm truncate">{user.fullName || user.userName}</p>
                       </div>
                     </div>
@@ -99,7 +99,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
                     <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
                       selectedUserId === user.id 
                         ? 'bg-[#0095F6] border-[#0095F6]' 
-                        : 'border-zinc-300 dark:border-zinc-600'
+                        : 'border-zinc-300'
                     }`}>
                       {selectedUserId === user.id && (
                         <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">

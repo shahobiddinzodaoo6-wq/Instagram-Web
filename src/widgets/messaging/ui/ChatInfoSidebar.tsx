@@ -28,9 +28,9 @@ export const ChatInfoSidebar: React.FC<ChatInfoSidebarProps> = ({ chat, onClose,
   };
 
   return (
-    <div className="w-[280px] h-full bg-white dark:bg-black border-l border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 animate-in slide-in-from-right duration-300">
+    <div className="w-[280px] h-full bg-white border-l border-zinc-200 flex flex-col shrink-0 animate-in slide-in-from-right duration-300">
       {/* Header */}
-      <div className="h-[60px] flex items-center px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
+      <div className="h-[60px] flex items-center px-4 border-b border-zinc-200 shrink-0">
         <h2 className="font-bold text-base">Информация</h2>
       </div>
 
@@ -43,19 +43,19 @@ export const ChatInfoSidebar: React.FC<ChatInfoSidebarProps> = ({ chat, onClose,
           </div>
           <button 
             onClick={() => setMuteNotifications(!muteNotifications)}
-            className={`w-10 h-5 rounded-full transition-colors relative shrink-0 ${muteNotifications ? 'bg-zinc-800 dark:bg-zinc-200' : 'bg-zinc-200 dark:bg-zinc-800'}`}
+            className={`w-10 h-5 rounded-full transition-colors relative shrink-0 ${muteNotifications ? 'bg-zinc-800' : 'bg-zinc-200'}`}
           >
-            <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-black rounded-full transition-transform ${muteNotifications ? 'translate-x-5' : ''}`} />
+            <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${muteNotifications ? 'translate-x-5' : ''}`} />
           </button>
         </div>
 
-        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-900 mx-4 my-2" />
+        <div className="h-[1px] bg-zinc-100 mx-4 my-2" />
 
         {/* Participants */}
         <div className="p-4 pt-2">
           <h3 className="font-bold text-sm mb-4">Участники</h3>
           <div className="flex items-center gap-3 cursor-pointer group">
-            <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 shrink-0 border border-zinc-100 dark:border-zinc-800">
+            <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 shrink-0 border border-zinc-100">
               <img 
                 src={chat.receiveUserImage ? `${urlImage}/${chat.receiveUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
                 className="w-full h-full object-cover" 
@@ -69,20 +69,20 @@ export const ChatInfoSidebar: React.FC<ChatInfoSidebarProps> = ({ chat, onClose,
           </div>
         </div>
 
-        <div className="mt-8 border-t border-zinc-200 dark:border-zinc-800">
-          <button className="w-full p-3 px-4 text-left text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors font-medium">
+        <div className="mt-8 border-t border-zinc-200">
+          <button className="w-full p-3 px-4 text-left text-sm hover:bg-zinc-50 transition-colors font-medium">
             Никнеймы
           </button>
-          <button className="w-full p-3 px-4 text-left text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors font-medium">
+          <button className="w-full p-3 px-4 text-left text-sm hover:bg-zinc-50 transition-colors font-medium">
             Заблокировать
           </button>
-          <button className="w-full p-3 px-4 text-left text-sm text-[#ED4956] hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors font-medium">
+          <button className="w-full p-3 px-4 text-left text-sm text-[#ED4956] hover:bg-zinc-50 transition-colors font-medium">
             Пожаловаться
           </button>
           <button 
             onClick={handleDeleteChat}
             disabled={deleteChatMutation.isPending}
-            className="w-full p-3 px-4 text-left text-sm text-[#ED4956] hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors font-medium"
+            className="w-full p-3 px-4 text-left text-sm text-[#ED4956] hover:bg-zinc-50 transition-colors font-medium"
           >
             {deleteChatMutation.isPending ? "Удаление..." : "Удалить чат"}
           </button>
