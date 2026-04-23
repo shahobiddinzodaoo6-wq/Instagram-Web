@@ -72,14 +72,14 @@ export const CallOverlay: React.FC<CallOverlayProps> = ({ isOpen, onClose, type,
       {/* Top Header */}
       <div className="p-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
-           <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-800">
-             <img 
-               src={currentUser?.image ? `${urlImage}/${currentUser.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-               className="w-full h-full object-cover" 
-               alt="" 
-             />
-           </div>
-           <span className="text-sm font-semibold">{currentUser?.userName || "..."}</span>
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-800">
+            <img
+              src={currentUser?.image ? `${urlImage}/${currentUser.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+              className="w-full h-full object-cover"
+              alt=""
+            />
+          </div>
+          <span className="text-sm font-semibold">{currentUser?.userName || "..."}</span>
         </div>
         <div className="flex items-center gap-4 text-zinc-400">
           <Settings className="w-6 h-6 cursor-pointer hover:text-white transition-colors" />
@@ -92,11 +92,11 @@ export const CallOverlay: React.FC<CallOverlayProps> = ({ isOpen, onClose, type,
         {/* Remote User Info (Center) */}
         <div className="flex flex-col items-center z-10">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-white/10 shadow-2xl">
-             <img 
-               src={receiverChat.receiveUserImage ? `${urlImage}/${receiverChat.receiveUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-               className="w-full h-full object-cover" 
-               alt="" 
-             />
+            <img
+              src={receiverChat.receiveUserImage ? `${urlImage}/${receiverChat.receiveUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+              className="w-full h-full object-cover"
+              alt=""
+            />
           </div>
           <h2 className="text-xl font-bold mb-1">{receiverChat.receiveUserName}</h2>
           <p className="text-zinc-400 text-sm">
@@ -107,11 +107,11 @@ export const CallOverlay: React.FC<CallOverlayProps> = ({ isOpen, onClose, type,
         {/* Local Video Background */}
         {isVideoOn && (
           <div className="absolute inset-0 overflow-hidden">
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline 
-              muted 
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
               className="w-full h-full object-cover opacity-60 scale-x-[-1]"
             />
             {/* Gradient Overlay for better UI visibility */}
@@ -122,32 +122,30 @@ export const CallOverlay: React.FC<CallOverlayProps> = ({ isOpen, onClose, type,
 
       {/* Bottom Controls */}
       <div className="p-10 flex justify-center items-center gap-6 animate-in slide-in-from-bottom-10 duration-500">
-        <button 
+        <button
           className="w-12 h-12 rounded-full bg-zinc-800/80 flex items-center justify-center hover:bg-zinc-700 transition-colors"
           title="Share Screen"
         >
           <Share2 className="w-6 h-6" />
         </button>
-        
-        <button 
+
+        <button
           onClick={() => setIsVideoOn(!isVideoOn)}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-            isVideoOn ? 'bg-zinc-800/80 hover:bg-zinc-700' : 'bg-white text-black'
-          }`}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isVideoOn ? 'bg-zinc-800/80 hover:bg-zinc-700' : 'bg-white text-black'
+            }`}
         >
           {isVideoOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
         </button>
 
-        <button 
+        <button
           onClick={() => setIsMuted(!isMuted)}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-            isMuted ? 'bg-white text-black' : 'bg-zinc-800/80 hover:bg-zinc-700'
-          }`}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isMuted ? 'bg-white text-black' : 'bg-zinc-800/80 hover:bg-zinc-700'
+            }`}
         >
           {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
         </button>
 
-        <button 
+        <button
           onClick={onClose}
           className="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-all transform hover:scale-110"
         >

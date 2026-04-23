@@ -16,23 +16,27 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const { data: recommendedResponse, isLoading: isLoadingRec } = useRecommendedUsers();
-  const { data: searchResponse, isLoading: isLoadingSearch } = useSearchUsers(searchQuery);
+  const { data: recommendedResponse, isFetching: isFetchingRec } = useRecommendedUsers();
+  const { data: searchResponse, isFetching: isFetchingSearch } = useSearchUsers(searchQuery);
   const createChatMutation = useCreateChat();
 
   if (!isOpen) return null;
 
-  const users = searchQuery ? searchResponse?.data : recommendedResponse?.data;
-  const isLoading = searchQuery ? isLoadingSearch : isLoadingRec;
+  const users = searchQuery ? (searchResponse?.data || []) : (recommendedResponse?.data || []);
+  const isSearching = searchQuery.length > 0;
+  const isLoading = isSearching ? isFetchingSearch : isFetchingRec;
 
   const handleCreateChat = async () => {
     if (!selectedUserId) return;
     
     createChatMutation.mutate(selectedUserId, {
-      onSuccess: () => {
+      onSuccess: (response) => {
         onClose();
         setSearchQuery("");
         setSelectedUserId(null);
+        if (response?.data?.chatId) {
+          onChatCreated(response.data.chatId);
+        }
       }
     });
   };
@@ -84,7 +88,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 shrink-0 border border-zinc-100 dark:border-zinc-800">
                         <img 
-                          src={user.image ? `${urlImage}/${user.image}` : `https://i.pravatar.cc/150?u=${user.userName}`} 
+                          src={user.image ? `${urlImage}/${user.image}` : (user.userImage ? `${urlImage}/${user.userImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png")} 
                           alt={user.userName} 
                           className="w-full h-full object-cover" 
                         />

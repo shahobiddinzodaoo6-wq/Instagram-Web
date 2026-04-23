@@ -16,11 +16,20 @@ interface ChatListProps {
 const ChatItem: React.FC<{ 
   chat: Chat; 
   isSelected: boolean; 
-  onSelect: (chat: Chat) => void 
-}> = ({ chat, isSelected, onSelect }) => {
+  onSelect: (chat: Chat) => void;
+  currentUserId?: string;
+  currentUserName?: string;
+}> = ({ chat, isSelected, onSelect, currentUserId, currentUserName }) => {
   const { data: messagesResponse } = useChatMessages(chat.chatId);
   const messages = messagesResponse?.data || [];
   const lastMessage = messages[messages.length - 1];
+
+  // Logic to find the other participant
+  const isMeSender = (currentUserId && String(chat.sendUserId) === String(currentUserId)) || 
+                     (currentUserName && chat.sendUserName === currentUserName);
+  
+  const otherUserName = isMeSender ? chat.receiveUserName : chat.sendUserName;
+  const otherUserImage = isMeSender ? chat.receiveUserImage : chat.sendUserImage;
 
   return (
     <div
@@ -32,14 +41,14 @@ const ChatItem: React.FC<{
       <div className="relative shrink-0">
         <div className="w-14 h-14 rounded-full overflow-hidden bg-zinc-200 border border-zinc-100 dark:border-zinc-800">
           <img 
-            src={chat.receiveUserImage ? `${urlImage}/${chat.receiveUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+            src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
             className="w-full h-full object-cover" 
-            alt={chat.receiveUserName}
+            alt={otherUserName}
           />
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{chat.receiveUserName}</p>
+        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{otherUserName || "User"}</p>
         {lastMessage && (
           <p className="text-zinc-500 text-xs truncate">
             {lastMessage.messageText} · {new Date(lastMessage.sendMassageDate).getHours()} ч.
@@ -52,10 +61,19 @@ const ChatItem: React.FC<{
 
 export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, selectedChatId }) => {
   const { data: chatsResponse, isLoading: isChatsLoading } = useChats();
-  const { data: profileResponse } = useMyProfile();
+  const { data: profileResponse, isLoading: isProfileLoading } = useMyProfile();
   const { data: recommendedUsersResponse } = useRecommendedUsers();
   
-  const chats = chatsResponse?.data || [];
+  const chats = [...(chatsResponse?.data || [])].sort((a, b) => {
+    const dateA = a.lastMessageDate ? new Date(a.lastMessageDate).getTime() : 0;
+    const dateB = b.lastMessageDate ? new Date(b.lastMessageDate).getTime() : 0;
+    
+    if (dateA !== dateB) {
+      return dateB - dateA;
+    }
+    return b.chatId - a.chatId;
+  });
+  
   const profile = profileResponse?.data;
   const recommendedUsers = recommendedUsersResponse?.data || [];
 
@@ -74,48 +92,48 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
 
       {/* Notes / Recommended Users */}
       <div className="px-5 mb-6">
-         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-            <div className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
-               <div className="relative">
-                  <div className="w-[72px] h-[72px] rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                     <img 
-                       src={profile?.image ? `${urlImage}/${profile.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-                       className="w-full h-full object-cover opacity-50 grayscale group-hover:opacity-100 transition-opacity" 
-                       alt="" 
-                     />
-                  </div>
-                  <div className="absolute -top-3 -left-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-2xl text-[11px] shadow-sm max-w-[90px] text-zinc-500 leading-tight">
-                    Пусть здесь будет комфортно...
-                  </div>
-                  <div className="absolute bottom-0 right-0 bg-[#0095F6] rounded-full border-2 border-white dark:border-black w-6 h-6 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">+</span>
-                  </div>
-               </div>
-               <span className="text-[11px] text-zinc-500 mt-1">Ваша заметка</span>
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
+            <div className="relative">
+              <div className="w-[72px] h-[72px] rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <img
+                  src={profile?.image ? `${urlImage}/${profile.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                  className="w-full h-full object-cover opacity-50 grayscale group-hover:opacity-100 transition-opacity"
+                  alt=""
+                />
+              </div>
+              <div className="absolute -top-3 -left-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-2xl text-[11px] shadow-sm max-w-[90px] text-zinc-500 leading-tight">
+                Пусть здесь будет комфортно...
+              </div>
+              <div className="absolute bottom-0 right-0 bg-[#0095F6] rounded-full border-2 border-white dark:border-black w-6 h-6 flex items-center justify-center">
+                <span className="text-white text-xs font-bold">+</span>
+              </div>
             </div>
-            
-            {recommendedUsers.slice(0, 5).map((user, i) => (
-               <div key={user.id || i} className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
-                  <div className="relative">
-                    <div className="w-[72px] h-[72px] rounded-full p-[2.5px] bg-gradient-to-tr from-[#FFD600] via-[#FF7A00] to-[#FF0069]">
-                       <div className="w-full h-full rounded-full bg-white dark:bg-black p-[2px]">
-                          <div className="w-full h-full rounded-full bg-zinc-200 overflow-hidden">
-                             <img 
-                               src={user.image ? `${urlImage}/${user.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-                               className="w-full h-full object-cover" 
-                               alt={user.userName} 
-                             />
-                          </div>
-                       </div>
-                    </div>
-                    <div className="absolute -top-3 -left-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-2xl text-[11px] shadow-sm max-w-[90px] truncate leading-tight group-hover:scale-105 transition-transform">
-                      {user.userName}
+            <span className="text-[11px] text-zinc-500 mt-1">Ваша заметка</span>
+          </div>
+
+          {recommendedUsers.slice(0, 5).map((user, i) => (
+            <div key={user.id || i} className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
+              <div className="relative">
+                <div className="w-[72px] h-[72px] rounded-full p-[2.5px] bg-gradient-to-tr from-[#FFD600] via-[#FF7A00] to-[#FF0069]">
+                  <div className="w-full h-full rounded-full bg-white dark:bg-black p-[2px]">
+                    <div className="w-full h-full rounded-full bg-zinc-200 overflow-hidden">
+                      <img
+                        src={user.image ? `${urlImage}/${user.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                        className="w-full h-full object-cover"
+                        alt={user.userName}
+                      />
                     </div>
                   </div>
-                  <span className="text-[11px] truncate w-16 text-center text-zinc-500 mt-1">{user.userName}</span>
-               </div>
-            ))}
-         </div>
+                </div>
+                <div className="absolute -top-3 -left-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-2xl text-[11px] shadow-sm max-w-[90px] truncate leading-tight group-hover:scale-105 transition-transform">
+                  {user.userName}
+                </div>
+              </div>
+              <span className="text-[11px] truncate w-16 text-center text-zinc-500 mt-1">{user.userName}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Messages List */}
@@ -126,7 +144,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
         </div>
 
         <div className="mt-1">
-          {isChatsLoading ? (
+          {isChatsLoading || isProfileLoading ? (
             <div className="p-10 flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0095F6]"></div>
             </div>
@@ -137,6 +155,8 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
                 chat={chat} 
                 isSelected={selectedChatId === chat.chatId} 
                 onSelect={onSelectChat}
+                currentUserId={profile?.id}
+                currentUserName={profile?.userName}
               />
             ))
           )}
