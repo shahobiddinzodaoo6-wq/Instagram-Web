@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Settings, 
   Grid, 
@@ -32,8 +32,10 @@ const Profile = () => {
     const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
     const [selectedReel, setSelectedReel] = useState<any>(null);
     const [isMuted, setIsMuted] = useState(false);
+    const [savedPostIds, setSavedPostIds] = useState<Set<number>>(new Set());
     const router = useRouter();
     const videoRef = useRef<HTMLVideoElement>(null);
+    const queryClient = useQueryClient();
 
     // 1. Fetch User Profile
     const { data: userData, isLoading: isProfileLoading } = useQuery({
@@ -54,6 +56,16 @@ const Profile = () => {
         enabled: activeTab === 'posts'
     });
 
+    // 3. Fetch Saved/Favorite Posts
+    const { data: savedPosts, isLoading: isSavedLoading } = useQuery({
+        queryFn: async () => {
+            const res = await axiosRequest.get(`/UserProfile/get-post-favorites?PageNumber=1&PageSize=50`);
+            return res.data.data || res.data;
+        },
+        queryKey: ['saved-posts'],
+        enabled: activeTab === 'saved'
+    });
+
     // 4. Fetch Single Post Details
     const { data: postDetails, isLoading: isPostLoading } = useQuery({
         queryFn: async () => {
@@ -62,6 +74,25 @@ const Profile = () => {
         },
         queryKey: ['post-details', selectedPostId],
         enabled: !!selectedPostId
+    });
+
+    // 5. Save/Favorite Post Mutation
+    const favoriteMutation = useMutation({
+        mutationFn: async (postId: number) => {
+            const res = await axiosRequest.post(`/Post/add-post-favorite`, { postId });
+            return res.data;
+        },
+        onMutate: (postId: number) => {
+            setSavedPostIds(prev => {
+                const next = new Set(prev);
+                if (next.has(postId)) next.delete(postId);
+                else next.add(postId);
+                return next;
+            });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['saved-posts'] });
+        }
     });
 
 
@@ -209,6 +240,38 @@ const Profile = () => {
                         )}
                     </div>
                 )}
+
+                {activeTab === 'saved' && (
+                    <div className="grid grid-cols-3 gap-1 md:gap-8">
+                        {isSavedLoading ? (
+                            <div className="col-span-3 text-center py-10">Loading saved posts...</div>
+                        ) : savedPosts?.length > 0 ? (
+                            savedPosts.map((post: any) => (
+                                <div
+                                    key={post.postId || post.id}
+                                    onClick={() => setSelectedPostId(post.postId || post.id)}
+                                    className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100"
+                                >
+                                    <img
+                                        src={post.images ? `${BASE_IMAGE_URL}${post.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=500&h=500&fit=crop"}
+                                        alt=""
+                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold space-x-4">
+                                        <span className="flex items-center"><Heart className="w-5 h-5 mr-2 fill-white" /> {post.postLikeCount || 0}</span>
+                                        <span className="flex items-center"><MessageCircle className="w-5 h-5 mr-2 fill-white" /> {post.commentCount || 0}</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-3 flex flex-col items-center justify-center py-20 text-gray-500">
+                                <Bookmark className="w-16 h-16 mb-4 stroke-1" />
+                                <p className="text-2xl font-bold text-gray-900 mb-2">Save</p>
+                                <p className="text-sm">Save photos and videos that you want to see again.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Post Details Modal */}
@@ -300,7 +363,12 @@ const Profile = () => {
                                         <button className="hover:text-gray-500 transition-colors"><MessageCircle className="w-6 h-6" /></button>
                                         <button className="hover:text-gray-500 transition-colors"><Send className="w-6 h-6" /></button>
                                     </div>
-                                    <button className="hover:text-gray-500 transition-colors"><Bookmark className="w-6 h-6" /></button>
+                                    <button 
+                                        onClick={() => selectedPostId && favoriteMutation.mutate(selectedPostId)}
+                                        className="hover:text-gray-500 transition-colors"
+                                    >
+                                        <Bookmark className={`w-6 h-6 transition-colors ${savedPostIds.has(selectedPostId!) ? 'fill-black' : ''}`} />
+                                    </button>
                                 </div>
                                 <div className="font-bold text-sm mb-1">{postDetails?.postLikeCount || 0} likes</div>
                                 <div className="text-[10px] text-gray-500 uppercase tracking-wide">April 23</div>
