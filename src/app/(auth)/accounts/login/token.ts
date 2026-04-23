@@ -1,6 +1,6 @@
 import axios from "axios"
-export const url = "https://store-api.softclub.tj"
-export const urlImage = "https://store-api.softclub.tj/images"
+export const url = "https://instagram-api.softclub.tj"
+export const urlImage = "https://instagram-api.softclub.tj/images"
 export function saveToken(token:string)
 {
     localStorage.setItem("token",token)

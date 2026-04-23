@@ -1,9 +1,7 @@
+import { Messenger } from "@/src/views/messenger/ui/Messenger";
+
 const DirectPage = () => {
-  return (
-    <div>
-      <h1>Direct Messages</h1>
-    </div>
-  );
+  return <Messenger />;
 };
 
 export default DirectPage;
