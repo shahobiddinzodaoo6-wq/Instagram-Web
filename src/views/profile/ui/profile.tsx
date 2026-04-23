@@ -2,11 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-<<<<<<< HEAD
-import { Dropdown, MenuProps, Modal, message } from 'antd';
-import { Trash2 } from 'lucide-react';
-=======
->>>>>>> 712bf2fd65c0b2d8cd702d43abdd2b010aaec12f
 import { 
   Settings, 
   Grid, 
@@ -25,9 +20,11 @@ import {
   MoreVertical,
   Music,
   Volume2,
-  VolumeX
+  VolumeX,
+  Trash2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Dropdown, MenuProps, message, Modal } from 'antd';
 
 const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
 
@@ -38,10 +35,11 @@ const Profile = () => {
     const [selectedReel, setSelectedReel] = useState<any>(null);
     const [isMuted, setIsMuted] = useState(false);
     const [savedPostIds, setSavedPostIds] = useState<Set<number>>(new Set());
+    const [isProfilePhotoModalOpen, setIsProfilePhotoModalOpen] = useState(false);
+    const [initialPostImage, setInitialPostImage] = useState<string | null>(null);
     const router = useRouter();
     const queryClient = useQueryClient();
     const videoRef = useRef<HTMLVideoElement>(null);
-    const queryClient = useQueryClient();
 
     // 0. Delete Post Mutation
     const deletePost = useMutation({
@@ -165,7 +163,10 @@ const Profile = () => {
             {/* Profile Header */}
             <header className="flex flex-col md:flex-row mb-12 md:mb-16">
                 <div className="flex-shrink-0 flex justify-center md:justify-start md:mr-24 mb-6 md:mb-0">
-                    <div className="relative w-20 h-20 md:w-[150px] md:h-[150px] rounded-full overflow-hidden border border-gray-200">
+                    <div 
+                        onClick={() => setIsProfilePhotoModalOpen(true)}
+                        className="relative w-20 h-20 md:w-[150px] md:h-[150px] rounded-full overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                    >
                         <img 
                             src={userData?.image ? `${BASE_IMAGE_URL}${userData.image}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"} 
                             alt="Profile" 
@@ -276,7 +277,10 @@ const Profile = () => {
                             posts.map((post: any) => (
                                 <div 
                                     key={post.postId || post.id} 
-                                    onClick={() => setSelectedPostId(post.postId || post.id)}
+                                    onClick={() => {
+                                        setSelectedPostId(post.postId || post.id);
+                                        setInitialPostImage(post.images ? `${BASE_IMAGE_URL}${post.images}` : null);
+                                    }}
                                     className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100"
                                 >
                                     <img 
@@ -304,7 +308,10 @@ const Profile = () => {
                             savedPosts.map((post: any) => (
                                 <div
                                     key={post.postId || post.id}
-                                    onClick={() => setSelectedPostId(post.postId || post.id)}
+                                    onClick={() => {
+                                        setSelectedPostId(post.postId || post.id);
+                                        setInitialPostImage(post.images ? `${BASE_IMAGE_URL}${post.images}` : null);
+                                    }}
                                     className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100"
                                 >
                                     <img
@@ -343,7 +350,7 @@ const Profile = () => {
                         {/* Post Image Container */}
                         <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full">
                             <img 
-                                src={postDetails?.images ? `${BASE_IMAGE_URL}${postDetails.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
+                                src={postDetails?.images ? `${BASE_IMAGE_URL}${postDetails.images}` : initialPostImage || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
                                 alt="" 
                                 className="max-h-full max-w-full object-contain"
                             />
@@ -445,6 +452,33 @@ const Profile = () => {
                                 />
                                 <button className="text-blue-500 font-bold text-sm hover:text-blue-700 disabled:opacity-50">Post</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Profile Photo Preview Modal */}
+            {isProfilePhotoModalOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300"
+                    onClick={() => setIsProfilePhotoModalOpen(false)}
+                >
+                    <button 
+                        onClick={() => setIsProfilePhotoModalOpen(false)}
+                        className="absolute top-4 right-4 text-white hover:text-gray-300 z-[210]"
+                    >
+                        <X className="w-8 h-8" />
+                    </button>
+                    <div className="flex flex-col items-center relative" onClick={e => e.stopPropagation()}>
+                        <div className="w-[300px] h-[300px] md:w-[450px] md:h-[450px] rounded-full overflow-hidden border-4 border-white/20 shadow-2xl mb-4">
+                            <img 
+                                src={userData?.image ? `${BASE_IMAGE_URL}${userData.image}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"} 
+                                alt="Profile" 
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div className="text-white text-center font-semibold text-xl tracking-wide bg-black/20 px-6 py-2 rounded-full backdrop-blur-sm">
+                            {userData?.userName}
                         </div>
                     </div>
                 </div>

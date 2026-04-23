@@ -37,24 +37,25 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, isMe, isSameUser, onDele
     }
   };
 
-  // Determine which info to show based on user's specific request
-  const displayUserName = isMe ? otherUserName : msg.userName;
-  const displayUserImage = isMe ? otherUserImage : msg.userImage;
+  const displayUserName = isMe ? "Вы" : (msg.userName || otherUserName);
+  const displayUserImage = isMe ? "" : (msg.userImage || otherUserImage);
 
   return (
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1 group`}>
       {!isSameUser && (
         <span className={`text-[10px] text-zinc-500 mb-1 ${isMe ? 'mr-2' : 'ml-9'}`}>
-          {displayUserName || "User"}
+          {isMe ? "Вы" : otherUserName}
         </span>
       )}
       <div className={`flex items-end gap-2 max-w-[85%] ${isMe ? 'flex-row-reverse' : ''}`}>
-        <div className={`w-7 h-7 rounded-full overflow-hidden bg-zinc-200 shrink-0 ${isSameUser ? 'opacity-0' : ''}`}>
-          <img 
-            src={displayUserImage ? `${urlImage}/${displayUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-            className="w-full h-full object-cover" 
-            alt="" 
-          />
+        <div className={`w-7 h-7 rounded-full overflow-hidden bg-zinc-200 shrink-0 ${isSameUser || isMe ? 'opacity-0' : ''}`}>
+          {!isMe && (
+            <img 
+              src={displayUserImage ? `${urlImage}/${displayUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+              className="w-full h-full object-cover" 
+              alt="" 
+            />
+          )}
         </div>
         
         <div className="relative flex items-center gap-2">
@@ -134,16 +135,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Call States
   const [isCallOpen, setIsCallOpen] = useState(false);
   const [callType, setCallType] = useState<"voice" | "video">("voice");
-
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const messages = [...(messagesResponse?.data || [])].reverse();
@@ -219,16 +217,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
 
   if (!chat) {
     return (
-<<<<<<< HEAD
-      <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-white dark:bg-black p-4 text-center">
-        <div className="w-24 h-24 rounded-full border-2 border-black dark:border-white flex items-center justify-center mb-4">
+      <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-white  p-4 text-center">
+        <div className="w-24 h-24 rounded-full border-2 border-black flex items-center justify-center mb-4">
           <SendIcon className="w-12 h-12" />
         </div>
-=======
-      <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-white p-4 text-center">
-        <div className="w-24 h-24 rounded-full border-2 border-black flex items-center justify-center mb-4"><SendIcon className="w-12 h-12" /></div>
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
-        <h2 className="text-xl font-medium mb-1">Ваши сообщения</h2>
+        <h2 className="text-xl font-medium mb-1 ">Ваши сообщения</h2>
         <p className="text-zinc-500 text-sm mb-6">Отправляйте личные фото и сообщения другу или группе.</p>
         <button onClick={onOpenNewChat} className="bg-[#0095F6] hover:bg-[#1877F2] text-white font-semibold py-1.5 px-4 rounded-lg text-sm">
           Отправить сообщение
@@ -246,48 +239,36 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
   const otherUserImage = isMeSender ? chat.receiveUserImage : chat.sendUserImage;
 
   return (
-<<<<<<< HEAD
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black overflow-hidden">
-      {/* Header */}
-      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 border border-zinc-100 dark:border-zinc-800">
-            <img src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
-=======
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
+      {/* Header */}
       <div className="p-4 border-b border-zinc-200 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 border border-zinc-100">
-            <img src={chat.receiveUserImage ? `${urlImage}/${chat.receiveUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
+            <img src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
           </div>
           <div className="flex flex-col">
             <p className="font-bold text-base leading-tight hover:text-zinc-500 cursor-pointer">{otherUserName}</p>
             <p className="text-xs text-zinc-500">{otherUserName.toLowerCase()}</p>
           </div>
         </div>
-<<<<<<< HEAD
-        <div className="flex items-center gap-4 text-zinc-700 dark:text-zinc-300 shrink-0">
+        <div className="flex items-center gap-4 text-zinc-700 shrink-0">
           <Phone
             className="w-6 h-6 cursor-pointer hover:text-zinc-400"
-=======
-        <div className="flex items-center gap-4 text-zinc-700 shrink-0">
-          <Phone 
-            className="w-6 h-6 cursor-pointer hover:text-zinc-400" 
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
             onClick={() => { setCallType("voice"); setIsCallOpen(true); }}
           />
           <Video
             className="w-7 h-7 cursor-pointer hover:text-zinc-400"
             onClick={() => { setCallType("video"); setIsCallOpen(true); }}
           />
-          <Info className={`w-6 h-6 cursor-pointer transition-colors ${isInfoOpen ? 'fill-black text-white' : 'text-zinc-700'}`} onClick={onToggleInfo} />
+          <Info 
+            className={`w-6 h-6 cursor-pointer transition-colors ${isInfoOpen ? 'fill-black text-white' : 'text-zinc-700'}`} 
+            onClick={onToggleInfo} 
+          />
         </div>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-2">
         <div className="flex flex-col items-center mb-8">
-<<<<<<< HEAD
           <div className="w-24 h-24 rounded-full overflow-hidden mb-3">
             <img src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
           </div>
@@ -295,23 +276,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
           <p className="text-zinc-500 text-sm">Instagram · {otherUserName}</p>
           <button 
             onClick={() => router.push(`/${otherUserName}`)}
-            className="mt-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-semibold px-4 py-1.5 rounded-lg text-sm transition-colors"
+            className="mt-4 bg-zinc-100 hover:bg-zinc-200 font-semibold px-4 py-1.5 rounded-lg text-sm transition-colors"
           >
             Смотреть профиль
           </button>
-=======
-           <div className="w-24 h-24 rounded-full overflow-hidden mb-3">
-              <img src={chat.receiveUserImage ? `${urlImage}/${chat.receiveUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
-           </div>
-           <p className="font-bold text-xl">{chat.receiveUserName}</p>
-           <p className="text-zinc-500 text-sm">Instagram · {chat.receiveUserName}</p>
-           <button 
-             onClick={() => router.push(`/${chat.receiveUserName}`)}
-             className="mt-4 bg-zinc-100 hover:bg-zinc-200 font-semibold px-4 py-1.5 rounded-lg text-sm transition-colors"
-           >
-             Смотреть профиль
-           </button>
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
         </div>
 
         {messages.map((msg, idx) => {
@@ -377,13 +345,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
             </div>
           ) : (
             <>
-<<<<<<< HEAD
               <Smile
-                className={`w-6 h-6 shrink-0 cursor-pointer transition-colors ${showEmojiPicker ? 'text-[#0095F6]' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-400'}`}
-=======
-              <Smile 
-                className={`w-6 h-6 shrink-0 cursor-pointer transition-colors ${showEmojiPicker ? 'text-[#0095F6]' : 'text-zinc-600 hover:text-zinc-400'}`} 
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
+                className={`w-6 h-6 shrink-0 cursor-pointer transition-colors ${showEmojiPicker ? 'text-[#0095F6]' : 'text-zinc-600 hover:text-zinc-400'}`}
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               />
               <input
@@ -403,15 +366,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
                   Отправить
                 </button>
               ) : (
-<<<<<<< HEAD
-                <div className="flex items-center gap-4 text-zinc-600 dark:text-zinc-400">
+                <div className="flex items-center gap-4 text-zinc-600">
                   <Mic
                     className="w-6 h-6 cursor-pointer hover:text-zinc-300 transition-colors"
-=======
-                <div className="flex items-center gap-4 text-zinc-600">
-                  <Mic 
-                    className="w-6 h-6 cursor-pointer hover:text-zinc-300 transition-colors" 
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
                     onClick={startRecording}
                   />
                   <label className="cursor-pointer hover:text-zinc-300 transition-colors">
