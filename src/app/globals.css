@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  
+  body {
+    @apply text-[#262626] bg-white;
+    color: #262626; /* Fallback */
+  }
+}
+
+/* Ensure all interactive elements have correct color */
+a, button, input, textarea {
+  color: inherit;
+}

@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Dropdown, MenuProps, Modal, message } from 'antd';
+import { Trash2 } from 'lucide-react';
 import { 
   Settings, 
   Grid, 
@@ -33,7 +35,57 @@ const Profile = () => {
     const [selectedReel, setSelectedReel] = useState<any>(null);
     const [isMuted, setIsMuted] = useState(false);
     const router = useRouter();
+    const queryClient = useQueryClient();
     const videoRef = useRef<HTMLVideoElement>(null);
+
+    // 0. Delete Post Mutation
+    const deletePost = useMutation({
+        mutationFn: async (id: number) => {
+            const { data } = await axiosRequest.delete(`/Post/delete-post?id=${id}`);
+            return data;
+        },
+        onSuccess: () => {
+            message.success("Post deleted successfully");
+            setSelectedPostId(null);
+            queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+            queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+        },
+        onError: () => {
+            message.error("Failed to delete post");
+        }
+    });
+
+    const handleDeleteClick = () => {
+        if (!selectedPostId) return;
+        
+        Modal.confirm({
+            title: 'Delete post?',
+            content: 'Are you sure you want to delete this post? This action cannot be undone.',
+            okText: 'Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk() {
+                deletePost.mutate(selectedPostId);
+            },
+        });
+    };
+
+    const postMenuItems: MenuProps['items'] = [
+        {
+            key: 'delete',
+            label: (
+                <div className="flex items-center gap-2 text-red-500 font-semibold py-1">
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
+                </div>
+            ),
+            onClick: handleDeleteClick
+        },
+        {
+            key: 'cancel',
+            label: <div className="py-1">Cancel</div>,
+        }
+    ];
 
     // 1. Fetch User Profile
     const { data: userData, isLoading: isProfileLoading } = useQuery({
@@ -241,7 +293,11 @@ const Profile = () => {
                                     </div>
                                     <span className="font-bold text-sm text-gray-900">{userData?.userName}</span>
                                 </div>
-                                <button className="p-1 hover:bg-gray-50 rounded-full transition-colors"><MoreVertical className="w-5 h-5" /></button>
+                                <Dropdown menu={{ items: postMenuItems }} trigger={['click']} placement="bottomRight">
+                                    <button className="p-1 hover:bg-gray-50 rounded-full transition-colors">
+                                        <MoreVertical className="w-5 h-5" />
+                                    </button>
+                                </Dropdown>
                             </div>
 
                             {/* Comments Section */}
