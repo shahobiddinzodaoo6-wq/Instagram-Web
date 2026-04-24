@@ -27,7 +27,6 @@ import { useRouter } from 'next/navigation';
 import { Dropdown, MenuProps, message, Modal } from 'antd';
 
 const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
-
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('posts');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,6 +38,7 @@ const Profile = () => {
     const [initialPostImage, setInitialPostImage] = useState<string | null>(null);
     const router = useRouter();
     const queryClient = useQueryClient();
+    const [commentText, setCommentText] = useState("");
     const videoRef = useRef<HTMLVideoElement>(null);
 
     // 0. Delete Post Mutation
@@ -147,6 +147,41 @@ const Profile = () => {
             queryClient.invalidateQueries({ queryKey: ['saved-posts'] });
         }
     });
+
+    // 6. Like Post Mutation
+    const likeMutation = useMutation({
+        mutationFn: async (postId: number) => {
+            const res = await axiosRequest.post(`/Post/like-post?postId=${postId}`);
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['post-details', selectedPostId] });
+            queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+        },
+        onError: () => {
+            message.error("Failed to like post");
+        }
+    });
+
+    // 7. Add Comment Mutation
+    const commentMutation = useMutation({
+        mutationFn: async (payload: { postId: number, comment: string }) => {
+            const res = await axiosRequest.post(`/Post/add-comment`, payload);
+            return res.data;
+        },
+        onSuccess: () => {
+            setCommentText("");
+            queryClient.invalidateQueries({ queryKey: ['post-details', selectedPostId] });
+        },
+        onError: () => {
+            message.error("Failed to add comment");
+        }
+    });
+
+    const handleAddComment = () => {
+        if (!commentText.trim() || !selectedPostId) return;
+        commentMutation.mutate({ postId: selectedPostId, comment: commentText });
+    };
 
 
     const handleLogout = () => {
@@ -425,7 +460,12 @@ const Profile = () => {
                             <div className="p-4 border-t border-gray-100">
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center space-x-4">
-                                        <button className="hover:text-gray-500 transition-colors"><Heart className="w-6 h-6" /></button>
+                                        <button 
+                                            onClick={() => selectedPostId && likeMutation.mutate(selectedPostId)}
+                                            className={`hover:opacity-50 transition-opacity ${postDetails?.isLiked ? 'text-red-500' : 'text-gray-800'}`}
+                                        >
+                                            <Heart className={`w-6 h-6 ${postDetails?.isLiked ? 'fill-current' : ''}`} />
+                                        </button>
                                         <button className="hover:text-gray-500 transition-colors"><MessageCircle className="w-6 h-6" /></button>
                                         <button className="hover:text-gray-500 transition-colors"><Send className="w-6 h-6" /></button>
                                     </div>
@@ -449,8 +489,17 @@ const Profile = () => {
                                     type="text" 
                                     placeholder="Add a comment..." 
                                     className="flex-1 text-sm focus:outline-none placeholder-gray-500"
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
                                 />
-                                <button className="text-blue-500 font-bold text-sm hover:text-blue-700 disabled:opacity-50">Post</button>
+                                <button 
+                                    onClick={handleAddComment}
+                                    disabled={!commentText.trim() || commentMutation.isPending}
+                                    className="text-blue-500 font-bold text-sm hover:text-blue-700 disabled:opacity-50"
+                                >
+                                    {commentMutation.isPending ? '...' : 'Post'}
+                                </button>
                             </div>
                         </div>
                     </div>

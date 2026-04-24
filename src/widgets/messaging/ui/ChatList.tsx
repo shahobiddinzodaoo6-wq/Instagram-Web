@@ -34,12 +34,12 @@ const ChatItem: React.FC<{
   return (
     <div
       onClick={() => onSelect(chat)}
-      className={`flex items-center gap-3 px-5 py-2 cursor-pointer hover:bg-zinc-50 transition-colors ${
-        isSelected ? "bg-zinc-50" : ""
+      className={`flex items-center gap-3 px-5 py-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors ${
+        isSelected ? "bg-zinc-50 dark:bg-zinc-900" : ""
       }`}
     >
       <div className="relative shrink-0">
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-zinc-200 border border-zinc-100">
+        <div className="w-14 h-14 rounded-full overflow-hidden bg-zinc-200 border border-zinc-100 dark:border-zinc-800">
           <img 
             src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
             className="w-full h-full object-cover" 
@@ -48,7 +48,7 @@ const ChatItem: React.FC<{
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <p className="font-medium text-sm text-zinc-900 ">{otherUserName || "User"}</p>
+        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{otherUserName || "User"}</p>
         {lastMessage && (
           <p className="text-zinc-500 text-xs truncate">
             {lastMessage.messageText} · {new Date(lastMessage.sendMassageDate).getHours()} ч.
@@ -78,22 +78,21 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
   const recommendedUsers = recommendedUsersResponse?.data || [];
 
   return (
-    <div className="w-full md:w-[320px] h-full flex flex-col border-r border-zinc-200 bg-white shrink-0">
+    <div className="w-full md:w-[350px] h-full flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black shrink-0">
       {/* Header */}
       <div className="p-5 flex items-center justify-between pb-3">
         <div className="flex items-center gap-1 cursor-pointer group">
           <span className="font-bold text-xl">{profile?.userName || "..."}</span>
           <ChevronDown className="w-4 h-4 group-hover:text-zinc-500" />
         </div>
-        <button onClick={onNewChat} className="p-1 hover:bg-zinc-100 rounded-full transition-colors">
+        <button onClick={onNewChat} className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full transition-colors">
           <SquarePen className="w-6 h-6" />
         </button>
       </div>
 
       {/* Notes / Recommended Users */}
-      <div className="px-5 mb-6 overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          {/* My Note */}
+      <div className="px-5 mb-6">
+        <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
             <div className="relative">
               <div className="w-[72px] h-[72px] rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200 overflow-hidden">
@@ -121,7 +120,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
                   <div className="w-full h-full rounded-full bg-white p-[2px]">
                     <div className="w-full h-full rounded-full bg-zinc-200 overflow-hidden">
                       <img
-                        src={user.image ? `${urlImage}/${user.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                        src={user.image ? `${urlImage}/${user.image}` : (user.userImage ? `${urlImage}/${user.userImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png")}
                         className="w-full h-full object-cover"
                         alt={user.userName}
                       />
@@ -148,7 +147,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
         <div className="mt-1">
           {isChatsLoading || isProfileLoading ? (
             <div className="p-10 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0095F6]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0095F6] text-[#0095F6]"></div>
             </div>
           ) : (
             chats.map((chat) => (

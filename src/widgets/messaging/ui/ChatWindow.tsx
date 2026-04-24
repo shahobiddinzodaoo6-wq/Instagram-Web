@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Phone, Video, Info, Smile, Mic, Image as ImageIcon, Heart, X, MoreVertical, Reply, Play, Pause, Trash2, Pin, Send } from "lucide-react";
+import { Phone, Video, Info, Smile, Mic, Image as ImageIcon, Heart, X, MoreVertical, Reply, Play, Pause, Trash2, Pin, Send, Plus, Copy, Pencil, Check } from "lucide-react";
 import { useChatMessages, useSendMessage, useDeleteMessage } from "@/src/entities/chat/api/chat.queries";
 import { useMyProfile } from "@/src/entities/user/api/user.queries";
 import { Chat, Message } from "@/src/entities/chat/model/types";
 import { urlImage } from "@/src/app/(auth)/accounts/login/token";
 import { useRouter } from "next/navigation";
 import { CallOverlay } from "./CallOverlay";
+
+const ALL_EMOJIS = ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👹", "👺", "🤡", "💩", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾"];
+
 
 interface MessageItemProps {
   msg: Message;
@@ -20,8 +23,26 @@ interface MessageItemProps {
 
 const MessageItem: React.FC<MessageItemProps> = ({ msg, isMe, isSameUser, onDelete, otherUserName, otherUserImage }) => {
   const [showOptions, setShowOptions] = useState(false);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showFullPicker, setShowFullPicker] = useState(false);
+  const [reaction, setReaction] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState(msg.messageText);
+  const [isPinned, setIsPinned] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(msg.messageText);
+    setShowOptions(false);
+  };
+
+  const handleSaveEdit = () => {
+    // Here would be the API call to update message
+    // Since we don't have it, we'll just update locally for now
+    msg.messageText = editedText; 
+    setIsEditing(false);
+  };
 
   const isVoice = msg.file?.endsWith('.webm') || msg.file?.endsWith('.mp3');
   const isImage = msg.file && (msg.file.endsWith('.jpg') || msg.file.endsWith('.png') || msg.file.endsWith('.jpeg'));
@@ -41,35 +62,43 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, isMe, isSameUser, onDele
   const displayUserImage = isMe ? "" : (msg.userImage || otherUserImage);
 
   return (
-    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1 group`}>
-      {!isSameUser && (
-        <span className={`text-[10px] text-zinc-500 mb-1 ${isMe ? 'mr-2' : 'ml-9'}`}>
-          {isMe ? "Вы" : otherUserName}
+    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1 group relative w-full`}>
+      {!isSameUser && !isMe && (
+        <span className={`text-[11px] text-zinc-500 mb-0.5 ml-9`}>
+          {msg.userName || (msg as any).UserName || "User"}
         </span>
       )}
       <div className={`flex items-end gap-2 max-w-[85%] ${isMe ? 'flex-row-reverse' : ''}`}>
-        <div className={`w-7 h-7 rounded-full overflow-hidden bg-zinc-200 shrink-0 ${isSameUser || isMe ? 'opacity-0' : ''}`}>
-          {!isMe && (
+        {!isMe && (
+          <div className={`w-7 h-7 rounded-full overflow-hidden bg-zinc-200 shrink-0 ${isSameUser ? 'opacity-0' : ''}`}>
             <img 
               src={displayUserImage ? `${urlImage}/${displayUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
               className="w-full h-full object-cover" 
               alt="" 
             />
-          )}
-        </div>
+          </div>
+        )}
         
-        <div className="relative flex items-center gap-2">
+        <div className={`relative flex items-center gap-2 ${isMe ? '' : 'flex-row-reverse'}`}>
           {/* Hover Actions */}
           <div className={`flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity ${isMe ? 'flex-row-reverse' : ''}`}>
             <div className="relative">
               <MoreVertical className="w-4 h-4 text-zinc-400 cursor-pointer hover:text-zinc-600" onClick={() => setShowOptions(!showOptions)} />
               {showOptions && (
-                <div className={`absolute bottom-full ${isMe ? 'right-0' : 'left-0'} mb-2 bg-white shadow-xl rounded-xl py-1.5 z-[100] border border-zinc-200 w-36 animate-in fade-in zoom-in-95`}>
-                   <div className="px-3 py-2 hover:bg-zinc-50 cursor-pointer flex items-center justify-between text-xs font-medium">
-                     Переслать <Send className="w-3.5 h-3.5" />
+                <div className={`absolute bottom-full ${isMe ? 'right-0' : 'left-0'} mb-2 bg-white shadow-xl rounded-xl py-1.5 z-[100] border border-zinc-200 w-40 animate-in fade-in zoom-in-95`}>
+                   <div className="px-3 py-2 hover:bg-zinc-50 cursor-pointer flex items-center justify-between text-xs font-medium" onClick={handleCopy}>
+                     Копировать <Copy className="w-3.5 h-3.5 text-zinc-500" />
                    </div>
+                   {isMe && !isVoice && !isImage && (
+                     <div className="px-3 py-2 hover:bg-zinc-50 cursor-pointer flex items-center justify-between text-xs font-medium border-t border-zinc-100" onClick={() => { setIsEditing(true); setShowOptions(false); }}>
+                       Изменить <Pencil className="w-3.5 h-3.5 text-zinc-500" />
+                     </div>
+                   )}
                    <div className="px-3 py-2 hover:bg-zinc-50 cursor-pointer flex items-center justify-between text-xs font-medium border-t border-zinc-100">
-                     Закрепить <Pin className="w-3.5 h-3.5" />
+                     Переслать <Send className="w-3.5 h-3.5 text-zinc-500" />
+                   </div>
+                   <div className="px-3 py-2 hover:bg-zinc-50 cursor-pointer flex items-center justify-between text-xs font-medium border-t border-zinc-100" onClick={() => { setIsPinned(!isPinned); setShowOptions(false); }}>
+                     {isPinned ? "Открепить" : "Закрепить"} <Pin className={`w-3.5 h-3.5 ${isPinned ? 'fill-zinc-500 text-zinc-500' : 'text-zinc-500'}`} />
                    </div>
                    <div className="px-3 py-2 hover:bg-zinc-50 cursor-pointer flex items-center justify-between text-xs font-medium text-red-500 border-t border-zinc-100" onClick={onDelete}>
                      Удалить <Trash2 className="w-3.5 h-3.5" />
@@ -78,37 +107,127 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, isMe, isSameUser, onDele
               )}
             </div>
             <Reply className="w-4 h-4 text-zinc-400 cursor-pointer hover:text-zinc-600" />
-            <Smile className="w-4 h-4 text-zinc-400 cursor-pointer hover:text-zinc-600" />
+            <div className="relative">
+              <Smile 
+                className={`w-4 h-4 cursor-pointer transition-colors ${showReactionPicker ? 'text-[#0095F6]' : 'text-zinc-400 hover:text-zinc-600'}`} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowReactionPicker(!showReactionPicker);
+                }}
+              />
+              {showReactionPicker && (
+                <div 
+                  className={`absolute bottom-full mb-2 bg-white dark:bg-zinc-900 shadow-2xl rounded-full px-2 py-1.5 flex items-center gap-1 z-[110] border border-zinc-100 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-200 ${isMe ? 'right-0' : 'left-0'}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {['❤️', '😂', '😮', '😢', '😠', '👍'].map(emoji => (
+                    <button 
+                      key={emoji}
+                      className="hover:scale-125 transition-transform duration-200 px-1 text-xl sm:text-2xl"
+                      onClick={() => {
+                        setReaction(emoji);
+                        setShowReactionPicker(false);
+                      }}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                  <div 
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center cursor-pointer hover:bg-zinc-200"
+                    onClick={() => {
+                      setShowFullPicker(true);
+                      setShowReactionPicker(false);
+                    }}
+                  >
+                    <Plus className="w-4 h-4 text-zinc-600" />
+                  </div>
+                </div>
+              )}
+
+              {/* Full Emoji Picker for Reactions */}
+              {showFullPicker && (
+                <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowFullPicker(false)}>
+                  <div 
+                    className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-[320px] shadow-2xl p-4 animate-in zoom-in-95 duration-200"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="font-semibold dark:text-white">Выберите реакцию</span>
+                      <button onClick={() => setShowFullPicker(false)}><X className="w-5 h-5 text-zinc-500" /></button>
+                    </div>
+                    <div className="grid grid-cols-6 gap-2 max-h-[300px] overflow-y-auto pr-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                      {ALL_EMOJIS.map((emoji, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setReaction(emoji);
+                            setShowFullPicker(false);
+                          }}
+                          className="text-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl transition-colors"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className={`overflow-hidden rounded-2xl text-sm ${
+          <div className={`relative overflow-visible rounded-[22px] text-[15px] ${
             isMe 
-              ? 'bg-[#3797F0] text-white' 
-              : 'bg-zinc-100 text-black border border-zinc-200'
-          }`}>
+              ? 'bg-[#0095F6] text-white rounded-tr-[4px]' 
+              : 'bg-[#EFEFEF] text-black border border-zinc-100 dark:bg-zinc-800 dark:text-white dark:border-zinc-700 rounded-tl-[4px]'
+          } ${isSameUser ? (isMe ? 'rounded-tr-[22px]' : 'rounded-tl-[22px]') : ''}`}>
             {isVoice ? (
               <div className="px-4 py-3 min-w-[220px] flex flex-col gap-2">
                 <div className="flex items-center gap-3">
-                  <button onClick={togglePlay} className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+                  <button onClick={togglePlay} className={`w-9 h-9 rounded-full ${isMe ? 'bg-white/20 hover:bg-white/30' : 'bg-black/10 hover:bg-black/20'} flex items-center justify-center transition-colors`}>
                     {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
                   </button>
                   <div className="flex-1 flex items-center gap-[2px]">
                     {[...Array(20)].map((_, i) => (
-                      <div key={i} className="flex-1 bg-white/40 rounded-full" style={{ height: `${Math.random() * 16 + 4}px` }} />
+                      <div key={i} className={`flex-1 ${isMe ? 'bg-white/40' : 'bg-black/20'} rounded-full`} style={{ height: `${Math.random() * 16 + 4}px` }} />
                     ))}
                   </div>
-                  <div className="bg-white/20 px-2 py-0.5 rounded-full text-[10px]">0:26</div>
+                  <div className={`${isMe ? 'bg-white/20' : 'bg-black/10'} px-2 py-0.5 rounded-full text-[10px]`}>0:26</div>
                 </div>
                 <audio ref={audioRef} src={`${urlImage}/${msg.file}`} onEnded={() => setIsPlaying(false)} className="hidden" />
-                <button className="text-[10px] opacity-80 hover:opacity-100 text-left">Смотреть текстовую версию</button>
+                <button className={`text-[10px] opacity-80 hover:opacity-100 text-left ${isMe ? 'text-white' : 'text-black'}`}>Смотреть текстовую версию</button>
               </div>
             ) : isImage ? (
               <div className="max-w-[300px]">
                 <img src={`${urlImage}/${msg.file}`} alt="Sent image" className="w-full h-auto object-cover" />
               </div>
+            ) : isEditing ? (
+              <div className="p-2 min-w-[200px]">
+                <textarea 
+                  className="w-full bg-transparent outline-none text-[15px] resize-none"
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  autoFocus
+                  rows={2}
+                />
+                <div className="flex justify-end gap-2 mt-1">
+                  <button onClick={() => setIsEditing(false)} className="text-[11px] opacity-70 hover:opacity-100">Отмена</button>
+                  <button onClick={handleSaveEdit} className="text-[11px] font-bold">Сохранить</button>
+                </div>
+              </div>
             ) : (
-              <div className="px-4 py-2 break-words">
+              <div className="px-4 py-2.5 break-words relative">
+                {isPinned && <Pin className="w-3 h-3 absolute top-1 right-1 text-white/70 fill-white/70" />}
                 {msg.messageText}
+              </div>
+            )}
+
+            {/* Reaction display */}
+            {reaction && (
+              <div 
+                className={`absolute -bottom-2 ${isMe ? 'right-2' : 'left-2'} bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full px-1.5 py-0.5 shadow-sm text-xs cursor-pointer hover:bg-zinc-50 transition-all z-10 flex items-center justify-center`}
+                onClick={() => setReaction(null)}
+              >
+                {reaction}
               </div>
             )}
           </div>
@@ -213,15 +332,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
   const addEmoji = (emoji: string) => setMessageText(prev => prev + emoji);
   const sendHeart = () => { if (chat) sendMessageMutation.mutate({ ChatId: chat.chatId, MessageText: "❤️" }); };
 
-  const emojis = ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👹", "👺", "🤡", "💩", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾"];
-
   if (!chat) {
     return (
-      <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-white  p-4 text-center">
-        <div className="w-24 h-24 rounded-full border-2 border-black flex items-center justify-center mb-4">
-          <SendIcon className="w-12 h-12" />
+      <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-white dark:bg-black p-4 text-center">
+        <div className="w-24 h-24 rounded-full border-2 border-black dark:border-white flex items-center justify-center mb-4">
+          <SendIcon className="w-12 h-12 text-black dark:text-white" />
         </div>
-        <h2 className="text-xl font-medium mb-1 ">Ваши сообщения</h2>
+        <h2 className="text-xl font-medium mb-1 dark:text-white">Ваши сообщения</h2>
         <p className="text-zinc-500 text-sm mb-6">Отправляйте личные фото и сообщения другу или группе.</p>
         <button onClick={onOpenNewChat} className="bg-[#0095F6] hover:bg-[#1877F2] text-white font-semibold py-1.5 px-4 rounded-lg text-sm">
           Отправить сообщение
@@ -230,8 +347,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
     );
   }
 
-  const currentUserId = profileResponse?.data?.id;
-  const currentUserName = profileResponse?.data?.userName;
+  const currentUserId = profileResponse?.data?.id || (profileResponse?.data as any)?.Id;
+  const currentUserName = profileResponse?.data?.userName || (profileResponse?.data as any)?.UserName;
   const isMeSender = (currentUserId && String(chat.sendUserId) === String(currentUserId)) || 
                      (currentUserName && chat.sendUserName === currentUserName);
   
@@ -239,19 +356,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
   const otherUserImage = isMeSender ? chat.receiveUserImage : chat.sendUserImage;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-zinc-200 flex items-center justify-between">
+      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 border border-zinc-100">
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 border border-zinc-100 dark:border-zinc-800">
             <img src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
           </div>
           <div className="flex flex-col">
-            <p className="font-bold text-base leading-tight hover:text-zinc-500 cursor-pointer">{otherUserName}</p>
+            <p className="font-bold text-base leading-tight hover:text-zinc-500 cursor-pointer dark:text-white">{otherUserName}</p>
             <p className="text-xs text-zinc-500">{otherUserName.toLowerCase()}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-zinc-700 shrink-0">
+        <div className="flex items-center gap-4 text-zinc-700 dark:text-zinc-300 shrink-0">
           <Phone
             className="w-6 h-6 cursor-pointer hover:text-zinc-400"
             onClick={() => { setCallType("voice"); setIsCallOpen(true); }}
@@ -260,10 +377,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
             className="w-7 h-7 cursor-pointer hover:text-zinc-400"
             onClick={() => { setCallType("video"); setIsCallOpen(true); }}
           />
-          <Info 
-            className={`w-6 h-6 cursor-pointer transition-colors ${isInfoOpen ? 'fill-black text-white' : 'text-zinc-700'}`} 
-            onClick={onToggleInfo} 
-          />
+          <Info className={`w-6 h-6 cursor-pointer transition-colors ${isInfoOpen ? 'fill-black text-white dark:fill-white dark:text-black' : 'text-zinc-700 dark:text-zinc-300'}`} onClick={onToggleInfo} />
         </div>
       </div>
 
@@ -272,20 +386,26 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
           <div className="w-24 h-24 rounded-full overflow-hidden mb-3">
             <img src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
           </div>
-          <p className="font-bold text-xl">{otherUserName}</p>
+          <p className="font-bold text-xl dark:text-white">{otherUserName}</p>
           <p className="text-zinc-500 text-sm">Instagram · {otherUserName}</p>
           <button 
             onClick={() => router.push(`/${otherUserName}`)}
-            className="mt-4 bg-zinc-100 hover:bg-zinc-200 font-semibold px-4 py-1.5 rounded-lg text-sm transition-colors"
+            className="mt-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-semibold px-4 py-1.5 rounded-lg text-sm transition-colors dark:text-white"
           >
             Смотреть профиль
           </button>
         </div>
 
         {messages.map((msg, idx) => {
-          const isMe = currentUserId && String(msg.userId) === String(currentUserId);
+          const msgUserId = msg.userId || (msg as any).UserId;
+          const msgUserName = msg.userName || (msg as any).UserName;
+          
+          const isMe = (currentUserId && String(msgUserId) === String(currentUserId)) || 
+                       (currentUserName && msgUserName === currentUserName);
+                       
           const prevMsg = messages[idx - 1];
-          const isSameUser = prevMsg && prevMsg.userId === msg.userId;
+          const prevMsgUserId = prevMsg ? (prevMsg.userId || (prevMsg as any).UserId) : null;
+          const isSameUser = prevMsg && prevMsgUserId === msgUserId;
 
           return (
             <MessageItem
@@ -305,13 +425,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
       {/* Input area */}
       <div className="p-4 pt-2 relative">
         {showEmojiPicker && (
-          <div className="absolute bottom-full left-4 mb-2 p-2 bg-white border border-zinc-200 rounded-2xl shadow-xl z-50 w-[300px] max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-bottom-2">
+          <div className="absolute bottom-full left-4 mb-2 p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl z-50 w-[300px] max-h-[300px] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden animate-in fade-in slide-in-from-bottom-2">
             <div className="grid grid-cols-8 gap-1">
-              {emojis.map((emoji, i) => (
+              {ALL_EMOJIS.map((emoji, i) => (
                 <button
                   key={i}
                   onClick={() => addEmoji(emoji)}
-                  className="p-1 hover:bg-zinc-100 rounded text-xl transition-colors"
+                  className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-xl transition-colors"
                 >
                   {emoji}
                 </button>
@@ -320,7 +440,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
           </div>
         )}
 
-        <div className="flex items-center gap-3 border border-zinc-200 rounded-full px-4 py-2 bg-white min-h-[44px]">
+        <div className="flex items-center gap-3 border border-zinc-200 dark:border-zinc-800 rounded-full px-4 py-2 bg-white dark:bg-black min-h-[44px]">
           {isRecording ? (
             <div className="flex-1 flex items-center gap-3 animate-in fade-in duration-300">
               <button onClick={cancelRecording} className="text-[#0095F6] hover:text-red-500">
@@ -346,13 +466,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
           ) : (
             <>
               <Smile
-                className={`w-6 h-6 shrink-0 cursor-pointer transition-colors ${showEmojiPicker ? 'text-[#0095F6]' : 'text-zinc-600 hover:text-zinc-400'}`}
+                className={`w-6 h-6 shrink-0 cursor-pointer transition-colors ${showEmojiPicker ? 'text-[#0095F6]' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-400'}`}
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               />
               <input
                 type="text"
                 placeholder="Напишите сообщение..."
-                className="flex-1 bg-transparent outline-none text-[15px]"
+                className="flex-1 bg-transparent outline-none text-[15px] dark:text-white"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 onFocus={() => setShowEmojiPicker(false)}
@@ -366,7 +486,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
                   Отправить
                 </button>
               ) : (
-                <div className="flex items-center gap-4 text-zinc-600">
+                <div className="flex items-center gap-4 text-zinc-600 dark:text-zinc-400">
                   <Mic
                     className="w-6 h-6 cursor-pointer hover:text-zinc-300 transition-colors"
                     onClick={startRecording}
