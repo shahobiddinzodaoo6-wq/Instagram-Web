@@ -27,7 +27,7 @@ export const Messenger = () => {
   }, [newChatId, chatsResponse]);
 
   return (
-    <div className="flex h-[calc(100vh-0px)] w-full max-h-[750px] overflow-hidden border-l border-zinc-200">
+    <div className="flex h-full w-full overflow-hidden">
       <ChatList 
         onSelectChat={(chat) => {
           setSelectedChat(chat);
