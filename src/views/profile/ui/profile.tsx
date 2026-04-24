@@ -2,11 +2,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-<<<<<<< HEAD
+
 import { Dropdown, MenuProps, Modal, message } from 'antd';
 import { Trash2 } from 'lucide-react';
-=======
->>>>>>> 712bf2fd65c0b2d8cd702d43abdd2b010aaec12f
+
 import { 
   Settings, 
   Grid, 
@@ -41,7 +40,6 @@ const Profile = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
     const videoRef = useRef<HTMLVideoElement>(null);
-    const queryClient = useQueryClient();
 
     // 0. Delete Post Mutation
     const deletePost = useMutation({
@@ -268,6 +266,49 @@ const Profile = () => {
 
             {/* Content Area */}
             <div className="py-4">
+                {activeTab === 'reels' && (
+                    <div className="grid grid-cols-3 gap-1 md:gap-8">
+                        {isReelsLoading ? (
+                            <div className="col-span-3 text-center py-10">Loading reels...</div>
+                        ) : (() => {
+                            // Combine reels from API with video posts from the general posts array
+                            const videoPosts = posts?.filter((p: any) => {
+                                const mediaFile = Array.isArray(p.images) ? p.images[0] : p.images;
+                                return typeof mediaFile === 'string' && mediaFile.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
+                            }) || [];
+                            
+                            // Deduplicate by ID
+                            const allReels = [...(reels || [])];
+                            videoPosts.forEach((vp: any) => {
+                                if (!allReels.find((r: any) => (r.postId || r.id) === (vp.postId || vp.id))) {
+                                    allReels.push(vp);
+                                }
+                            });
+
+                            return allReels.length > 0 ? (
+                                allReels.map((reel: any) => (
+                                    <div 
+                                        key={reel.postId || reel.id} 
+                                        onClick={() => setSelectedReel(reel)}
+                                        className="aspect-[9/16] relative group cursor-pointer overflow-hidden bg-black flex items-center justify-center"
+                                    >
+                                        <video 
+                                            src={`${BASE_IMAGE_URL}${Array.isArray(reel.images) ? reel.images[0] : reel.images}`} 
+                                            className="w-full h-full object-cover"
+                                            muted
+                                            loop
+                                        />
+                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold z-10">
+                                            <span className="flex items-center"><Play className="w-6 h-6 mr-1 fill-white" /> {reel.postLikeCount || 0}</span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="col-span-3 text-center py-20 text-gray-500 font-medium">No reels yet</div>
+                            );
+                        })()}
+                    </div>
+                )}
                 {activeTab === 'posts' && (
                     <div className="grid grid-cols-3 gap-1 md:gap-8">
                         {isPostsLoading ? (
@@ -277,17 +318,37 @@ const Profile = () => {
                                 <div 
                                     key={post.postId || post.id} 
                                     onClick={() => setSelectedPostId(post.postId || post.id)}
-                                    className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100"
+                                    className="aspect-square relative group cursor-pointer overflow-hidden bg-black flex items-center justify-center"
                                 >
-                                    <img 
-                                        src={post.images ? `${BASE_IMAGE_URL}${post.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=500&h=500&fit=crop"} 
-                                        alt="" 
-                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold space-x-4">
+                                    {(() => {
+                                        const mediaFile = Array.isArray(post.images) ? post.images[0] : post.images;
+                                        const isVideoFile = typeof mediaFile === 'string' && mediaFile.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
+                                        const fullUrl = mediaFile ? `${BASE_IMAGE_URL}${mediaFile}` : "";
+
+                                        return isVideoFile ? (
+                                            <video 
+                                                src={fullUrl} 
+                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                muted
+                                            />
+                                        ) : (
+                                            <img 
+                                                src={mediaFile ? fullUrl : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=500&h=500&fit=crop"} 
+                                                alt="" 
+                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                            />
+                                        );
+                                    })()}
+                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold space-x-4 z-10">
                                         <span className="flex items-center"><Heart className="w-5 h-5 mr-2 fill-white" /> {post.postLikeCount || 0}</span>
                                         <span className="flex items-center"><MessageCircle className="w-5 h-5 mr-2 fill-white" /> {post.commentCount || 0}</span>
                                     </div>
+                                    {/* Video Icon for Grid */}
+                                    {typeof post.images === 'string' && post.images.match(/\.(mp4|mov|avi|webm|mkv)$|video/i) && (
+                                        <div className="absolute top-2 right-2 z-20 text-white drop-shadow-md">
+                                            <Play className="w-5 h-5 fill-white" />
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         ) : (
@@ -341,12 +402,29 @@ const Profile = () => {
 
                     <div className="bg-white w-full max-w-[1200px] h-[90vh] flex flex-col md:flex-row rounded-sm overflow-hidden">
                         {/* Post Image Container */}
-                        <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full">
-                            <img 
-                                src={postDetails?.images ? `${BASE_IMAGE_URL}${postDetails.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
-                                alt="" 
-                                className="max-h-full max-w-full object-contain"
-                            />
+                        <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full overflow-hidden">
+                            {(() => {
+                                const mediaPath = Array.isArray(postDetails?.images) ? postDetails?.images[0] : postDetails?.images;
+                                const isVideo = typeof mediaPath === 'string' && mediaPath.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
+                                const fullUrl = mediaPath ? `${BASE_IMAGE_URL}${mediaPath}` : "";
+
+                                return isVideo ? (
+                                    <video 
+                                        src={fullUrl} 
+                                        className="max-h-full max-w-full object-contain" 
+                                        controls 
+                                        autoPlay 
+                                        muted 
+                                        loop 
+                                    />
+                                ) : (
+                                    <img 
+                                        src={mediaPath ? fullUrl : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
+                                        alt="" 
+                                        className="max-h-full max-w-full object-contain" 
+                                    />
+                                );
+                            })()}
                         </div>
 
                         {/* Post Info & Comments */}

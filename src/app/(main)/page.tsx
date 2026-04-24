@@ -350,8 +350,23 @@ const PostItem = ({ post }: { post: any }) => {
 
       {/* ── Media ── */}
       {hasImage && postImageFullUrl ? (
-        <div className="w-full border border-[#efefef] rounded-[4px] overflow-hidden">
-          <img src={postImageFullUrl} alt="Post content" className="w-full object-cover" />
+        <div className="w-full border border-[#efefef] rounded-[4px] overflow-hidden bg-black flex items-center justify-center aspect-square">
+          {(() => {
+            const mediaFile = post.images[0];
+            const isVideoFile = typeof mediaFile === 'string' && mediaFile.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
+            return isVideoFile ? (
+              <video 
+                src={postImageFullUrl} 
+                className="w-full h-full object-contain" 
+                controls 
+                autoPlay 
+                muted 
+                loop 
+              />
+            ) : (
+              <img src={postImageFullUrl} alt="Post content" className="w-full h-full object-cover" />
+            );
+          })()}
         </div>
       ) : (
         <div className="bg-[#fafafa] w-full aspect-square flex flex-col items-center justify-center p-6 border border-[#efefef] rounded-[4px] text-center">
@@ -449,9 +464,24 @@ const PostItem = ({ post }: { post: any }) => {
             className="bg-white max-w-[1100px] w-full h-full max-h-[90vh] rounded-[4px] flex flex-col md:flex-row overflow-hidden shadow-2xl" 
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex-1 bg-black flex items-center justify-center max-h-[50vh] md:max-h-full min-h-[30vh]">
+            <div className="flex-1 bg-black flex items-center justify-center max-h-[50vh] md:max-h-full min-h-[30vh] overflow-hidden">
               {hasImage && postImageFullUrl ? (
-                <img src={postImageFullUrl} className="w-full h-full object-contain" alt="Modal Post" />
+                (() => {
+                  const mediaFile = post.images[0];
+                  const isVideoFile = typeof mediaFile === 'string' && mediaFile.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
+                  return isVideoFile ? (
+                    <video 
+                      src={postImageFullUrl} 
+                      className="w-full h-full object-contain" 
+                      controls 
+                      autoPlay 
+                      muted 
+                      loop 
+                    />
+                  ) : (
+                    <img src={postImageFullUrl} className="w-full h-full object-contain" alt="Modal Post" />
+                  );
+                })()
               ) : (
                 <div className="bg-[#fafafa] w-full h-full flex flex-col items-center justify-center p-6 text-center text-[#262626]">
                   <h2 className="text-xl font-bold break-words w-full">{post.title}</h2>

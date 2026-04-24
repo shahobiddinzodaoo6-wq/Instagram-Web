@@ -159,13 +159,24 @@ const CreatePostPage = () => {
             /* Step 2: Finalize */
             <div className="flex flex-1 flex-col md:flex-row">
               {/* Preview Area */}
-              <div className="flex flex-1 items-center justify-center bg-black overflow-hidden">
+              <div className="flex flex-1 items-center justify-center bg-black overflow-hidden relative">
                 {previews.length > 0 && (
-                  <img
-                    src={previews[0]}
-                    alt="Preview"
-                    className="h-full w-full object-contain"
-                  />
+                  selectedFiles[0]?.type.startsWith("video/") ? (
+                    <video
+                      src={previews[0]}
+                      className="h-full w-full object-contain"
+                      autoPlay
+                      muted
+                      loop
+                      controls
+                    />
+                  ) : (
+                    <img
+                      src={previews[0]}
+                      alt="Preview"
+                      className="h-full w-full object-contain"
+                    />
+                  )
                 )}
               </div>
 
