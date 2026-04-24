@@ -2,11 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-<<<<<<< HEAD
-
-import { Dropdown, MenuProps, Modal, message } from 'antd';
-import { Trash2 } from 'lucide-react';
-
+import { Dropdown, MenuProps, message, Modal } from 'antd';
 import { 
   Settings, 
   Grid, 
@@ -25,32 +21,10 @@ import {
   MoreVertical,
   Music,
   Volume2,
-  VolumeX
-=======
-import {
-    Settings,
-    Grid,
-    Bookmark,
-    Tag,
-    Menu,
-    Plus,
-    QrCode,
-    Bell,
-    LogOut,
-    Play,
-    Heart,
-    MessageCircle,
-    X,
-    Send,
-    MoreVertical,
-    Music,
-    Volume2,
-    VolumeX,
-    Trash2
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
+  VolumeX,
+  Trash2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Dropdown, MenuProps, message, Modal } from 'antd';
 
 const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
 const Profile = () => {
@@ -135,7 +109,17 @@ const Profile = () => {
             return res.data.data || res.data;
         },
         queryKey: ['user-posts'],
-        enabled: activeTab === 'posts'
+        enabled: activeTab === 'posts' || activeTab === 'reels'
+    });
+
+    // reels
+    const { data: reels, isLoading: isReelsLoading } = useQuery({
+        queryFn: async () => {
+            const res = await axiosRequest.get(`Post/get-reels`);
+            return res.data.data || res.data;
+        },
+        queryKey: ['user-reels'],
+        enabled: activeTab === 'reels'
     });
 
     // 3. Fetch Saved/Favorite Posts
@@ -219,7 +203,6 @@ const Profile = () => {
             const res = await axiosRequest.get(`/FollowingRelationShip/get-subscribers`, {
                 params: { 
                     UserId: targetId,
-                    userId: targetId,
                     PageNumber: 1,
                     PageSize: 100
                 }
@@ -238,7 +221,6 @@ const Profile = () => {
             const res = await axiosRequest.get(`/FollowingRelationShip/get-subscriptions`, {
                 params: { 
                     UserId: targetId,
-                    userId: targetId,
                     PageNumber: 1,
                     PageSize: 100
                 }
@@ -250,7 +232,7 @@ const Profile = () => {
         enabled: !!(userData?.id || userData?.userId) && isFollowingModalOpen,
     });
 
-    // 10. Follow/Unfollow Mutations for the list
+    // 10. Follow/Unfollow Mutations
     const followUserMutation = useMutation({
         mutationFn: async (userId: string) => {
             await axiosRequest.post(`/FollowingRelationShip/add-following-relation-ship?followingUserId=${userId}`);
@@ -273,6 +255,22 @@ const Profile = () => {
             queryClient.invalidateQueries({ queryKey: ['user-profile'] });
         },
         onError: () => message.error("Failed to unfollow user")
+    });
+
+    // 11. Remove Follower Mutation
+    const removeFollowerMutation = useMutation({
+        mutationFn: async (userId: string) => {
+            // Usually there is a specific endpoint for removing a follower
+            // If not available, we might just use the unfollow logic or similar
+            // For now, let's assume delete-following-relation-ship handles it if we are the 'following'
+            await axiosRequest.delete(`/FollowingRelationShip/delete-following-relation-ship?followingUserId=${userId}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['user-followers'] });
+            queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+            message.success("Follower removed");
+        },
+        onError: () => message.error("Failed to remove follower")
     });
 
 
@@ -346,16 +344,16 @@ const Profile = () => {
                     </div>
 
                     <div className="flex space-x-10 mb-5">
-                        <div className="cursor-default"><span className="font-semibold">{userData?.postCount || 0}</span> posts</div>
+                        <div className="cursor-default text-[16px]"><span className="font-semibold">{userData?.postCount || 0}</span> posts</div>
                         <div
                             onClick={() => setIsFollowersModalOpen(true)}
-                            className="cursor-pointer hover:opacity-70 transition-opacity"
+                            className="cursor-pointer hover:opacity-70 transition-opacity text-[16px]"
                         >
                             <span className="font-semibold">{userData?.subscribersCount || 0}</span> followers
                         </div>
                         <div
                             onClick={() => setIsFollowingModalOpen(true)}
-                            className="cursor-pointer hover:opacity-70 transition-opacity"
+                            className="cursor-pointer hover:opacity-70 transition-opacity text-[16px]"
                         >
                             <span className="font-semibold">{userData?.subscriptionsCount || 0}</span> following
                         </div>
@@ -455,10 +453,13 @@ const Profile = () => {
                             <div className="col-span-3 text-center py-10">Loading posts...</div>
                         ) : posts?.length > 0 ? (
                             posts.map((post: any) => (
-<<<<<<< HEAD
                                 <div 
                                     key={post.postId || post.id} 
-                                    onClick={() => setSelectedPostId(post.postId || post.id)}
+                                    onClick={() => {
+                                        setSelectedPostId(post.postId || post.id);
+                                        const mediaFile = Array.isArray(post.images) ? post.images[0] : post.images;
+                                        setInitialPostImage(mediaFile ? `${BASE_IMAGE_URL}${mediaFile}` : null);
+                                    }}
                                     className="aspect-square relative group cursor-pointer overflow-hidden bg-black flex items-center justify-center"
                                 >
                                     {(() => {
@@ -481,22 +482,6 @@ const Profile = () => {
                                         );
                                     })()}
                                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold space-x-4 z-10">
-=======
-                                <div
-                                    key={post.postId || post.id}
-                                    onClick={() => {
-                                        setSelectedPostId(post.postId || post.id);
-                                        setInitialPostImage(post.images ? `${BASE_IMAGE_URL}${post.images}` : null);
-                                    }}
-                                    className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100"
-                                >
-                                    <img
-                                        src={post.images ? `${BASE_IMAGE_URL}${post.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=500&h=500&fit=crop"}
-                                        alt=""
-                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold space-x-4">
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
                                         <span className="flex items-center"><Heart className="w-5 h-5 mr-2 fill-white" /> {post.postLikeCount || 0}</span>
                                         <span className="flex items-center"><MessageCircle className="w-5 h-5 mr-2 fill-white" /> {post.commentCount || 0}</span>
                                     </div>
@@ -562,12 +547,11 @@ const Profile = () => {
 
                     <div className="bg-white w-full max-w-[1200px] h-[90vh] flex flex-col md:flex-row rounded-sm overflow-hidden">
                         {/* Post Image Container */}
-<<<<<<< HEAD
                         <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full overflow-hidden">
                             {(() => {
                                 const mediaPath = Array.isArray(postDetails?.images) ? postDetails?.images[0] : postDetails?.images;
                                 const isVideo = typeof mediaPath === 'string' && mediaPath.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
-                                const fullUrl = mediaPath ? `${BASE_IMAGE_URL}${mediaPath}` : "";
+                                const fullUrl = mediaPath ? `${BASE_IMAGE_URL}${mediaPath}` : (initialPostImage || "");
 
                                 return isVideo ? (
                                     <video 
@@ -580,20 +564,12 @@ const Profile = () => {
                                     />
                                 ) : (
                                     <img 
-                                        src={mediaPath ? fullUrl : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
+                                        src={mediaPath ? fullUrl : initialPostImage || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
                                         alt="" 
                                         className="max-h-full max-w-full object-contain" 
                                     />
                                 );
                             })()}
-=======
-                        <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full">
-                            <img
-                                src={postDetails?.images ? `${BASE_IMAGE_URL}${postDetails.images}` : initialPostImage || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"}
-                                alt=""
-                                className="max-h-full max-w-full object-contain"
-                            />
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
                         </div>
 
                         {/* Post Info & Comments */}
@@ -781,71 +757,97 @@ const Profile = () => {
                         </div>
 
                         {/* Users List */}
-                        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+                        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 pt-2">
                             {(isFollowersModalOpen ? isFollowersLoading : isFollowingLoading) ? (
-                                <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                                    <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-800 rounded-full animate-spin" />
-                                    <span className="text-gray-500 text-sm font-medium">Loading users...</span>
+                                <div className="flex flex-col items-center justify-center py-20">
+                                    <div className="w-8 h-8 border-2 border-gray-200 border-t-[#0095F6] rounded-full animate-spin" />
                                 </div>
                             ) : (
-                                (isFollowersModalOpen ? followers : following)?.filter((u: any) =>
-                                    u.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    (u.fullName && u.fullName.toLowerCase().includes(searchQuery.toLowerCase()))
-                                ).length > 0 ? (
+                                (isFollowersModalOpen ? followers : following)?.filter((u: any) => {
+                                    const name = u.userName || u.username || u.followingUserName || "";
+                                    const full = u.fullName || u.fullname || u.firstName || "";
+                                    return name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                           full.toLowerCase().includes(searchQuery.toLowerCase());
+                                }).length > 0 ? (
                                     (isFollowersModalOpen ? followers : following)
-                                        .filter((u: any) =>
-                                            u.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                            (u.fullName && u.fullName.toLowerCase().includes(searchQuery.toLowerCase()))
-                                        )
-                                        .map((user: any, index: number) => (
-                                            <div key={user.id || user.userId || user.followingUserId || index} className="flex items-center justify-between group">
-                                                <div className="flex items-center space-x-3 cursor-pointer">
-                                                    <div className="w-11 h-11 rounded-full overflow-hidden border border-gray-100 ring-2 ring-transparent group-hover:ring-gray-100 transition-all">
-                                                        <img
-                                                            src={(user.image || user.avatar || user.userImage) ? `${BASE_IMAGE_URL}${user.image || user.avatar || user.userImage}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"}
-                                                            alt=""
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                        .filter((u: any) => {
+                                            const name = u.userName || u.username || u.followingUserName || "";
+                                            const full = u.fullName || u.fullname || u.firstName || "";
+                                            return name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                                   full.toLowerCase().includes(searchQuery.toLowerCase());
+                                        })
+                                        .map((user: any, index: number) => {
+                                            const uName = user.userName || user.username || user.followingUserName || "User";
+                                            const uFull = user.fullName || user.fullname || (user.firstName ? `${user.firstName} ${user.lastName || ""}` : uFull);
+                                            const uImage = user.image || user.avatar || user.userImage || user.followingUserImage;
+                                            const uId = user.id || user.userId || user.followingUserId;
+                                            const isFollowedByMe = user.isFollowing || (isFollowingModalOpen && !isFollowersModalOpen);
+
+                                            return (
+                                                <div key={uId || index} className="flex items-center justify-between group py-1">
+                                                    <div 
+                                                        className="flex items-center space-x-3 cursor-pointer flex-1 min-w-0"
+                                                        onClick={() => {
+                                                            router.push(`/${uName}`);
+                                                            setIsFollowersModalOpen(false);
+                                                            setIsFollowingModalOpen(false);
+                                                        }}
+                                                    >
+                                                        <div className="w-11 h-11 rounded-full overflow-hidden border border-gray-100 flex-shrink-0">
+                                                            <img
+                                                                src={uImage ? `${BASE_IMAGE_URL}${uImage}` : "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg"}
+                                                                alt=""
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="font-bold text-[14px] leading-tight text-gray-900 truncate">{uName}</span>
+                                                            <span className="text-gray-500 text-[14px] leading-tight truncate">{uFull}</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-sm leading-tight text-gray-900 hover:underline">{user.userName || user.username || user.followingUserName}</span>
-                                                        <span className="text-gray-500 text-sm leading-tight">{user.fullName || user.userName || user.username || user.followingUserName}</span>
+
+                                                    <div className="flex items-center space-x-2 ml-3">
+                                                        {isFollowersModalOpen ? (
+                                                            <>
+                                                                {!isFollowedByMe && uId !== (userData?.id || userData?.userId) && (
+                                                                    <button 
+                                                                        onClick={() => followUserMutation.mutate(uId)}
+                                                                        className="px-4 py-1.5 bg-[#0095F6] hover:bg-[#1877F2] text-white font-bold rounded-lg text-sm transition-colors"
+                                                                    >
+                                                                        Follow
+                                                                    </button>
+                                                                )}
+                                                                <button 
+                                                                    onClick={() => removeFollowerMutation.mutate(uId)}
+                                                                    className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold rounded-lg text-sm transition-colors border border-gray-200"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <button 
+                                                                onClick={() => unfollowUserMutation.mutate(uId)}
+                                                                className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold rounded-lg text-sm transition-colors border border-gray-200"
+                                                            >
+                                                                Following
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
-
-                                                {(user.id || user.userId || user.followingUserId) !== (userData?.id || userData?.userId) && (
-                                                    <button 
-                                                        onClick={() => {
-                                                            const uid = user.id || user.userId || user.followingUserId;
-                                                            if (user.isFollowing || (isFollowingModalOpen && !isFollowersModalOpen)) {
-                                                                unfollowUserMutation.mutate(uid);
-                                                            } else {
-                                                                followUserMutation.mutate(uid);
-                                                            }
-                                                        }}
-                                                        className={`px-5 py-1.5 rounded-lg text-sm font-bold transition-all ${(user.isFollowing || (isFollowingModalOpen && !isFollowersModalOpen))
-                                                                ? 'bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200'
-                                                                : 'bg-[#0095F6] hover:bg-[#1877F2] text-white shadow-sm'
-                                                            }`}
-                                                    >
-                                                        {(user.isFollowing || (isFollowingModalOpen && !isFollowersModalOpen)) ? 'Following' : 'Follow'}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-20 text-center px-6">
                                         <div className="w-16 h-16 rounded-full border border-gray-200 flex items-center justify-center mb-4 bg-gray-50">
-                                            <Settings className="w-8 h-8 text-gray-400 stroke-1" />
+                                            {isFollowersModalOpen ? <Plus className="w-8 h-8 text-gray-400" /> : <Settings className="w-8 h-8 text-gray-400" />}
                                         </div>
-                                        <p className="font-bold text-lg text-gray-900">
-                                            {searchQuery ? 'No results found' : (isFollowersModalOpen ? 'Followers' : 'Following')}
+                                        <p className="font-bold text-xl text-gray-900 mb-1">
+                                            {isFollowersModalOpen ? "Followers" : "Following"}
                                         </p>
-                                        <p className="text-sm text-gray-500 mt-1 max-w-[200px]">
-                                            {searchQuery
-                                                ? `We couldn't find any results for "${searchQuery}"`
-                                                : (isFollowersModalOpen ? "You'll see all the people who follow you here." : "You'll see all the people you follow here.")
-                                            }
+                                        <p className="text-gray-500 text-sm">
+                                            {isFollowersModalOpen 
+                                                ? "You'll see all the people who follow you here." 
+                                                : "You'll see all the people you follow here."}
                                         </p>
                                     </div>
                                 )
