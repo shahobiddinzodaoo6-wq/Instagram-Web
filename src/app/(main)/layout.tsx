@@ -1,7 +1,7 @@
 "use client";
 
 import { Sidebar } from '../../widgets/sidebar';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'sileo';
 
@@ -18,14 +18,17 @@ const Layout = ({ children } : any) => {
         }
     }, [router]);
 
+    const pathname = usePathname();
+    const isDirectPage = pathname?.startsWith('/direct');
+
     if (loading) return <div className="flex items-center justify-center h-screen font-sans">Loading...</div>;
 
     return (
-        <div className="flex min-h-screen bg-white">
+        <div className="flex h-screen bg-white overflow-hidden">
             <Sidebar />
-            <div className="flex-1 ml-[72px] xl:ml-[244px] transition-all duration-300">
+            <div className="flex-1 ml-[72px] xl:ml-[244px] transition-all duration-300 h-screen flex flex-col overflow-hidden">
                 <Toaster position="top-right" />
-                <main className="max-w-[935px] mx-auto py-8 px-4">
+                <main className={`flex-1 flex flex-col overflow-hidden ${isDirectPage ? '' : 'max-w-[935px] mx-auto py-8 px-4 w-full'}`}>
                     {children}
                 </main>
             </div>
