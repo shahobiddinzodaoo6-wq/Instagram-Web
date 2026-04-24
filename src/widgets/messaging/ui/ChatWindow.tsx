@@ -338,11 +338,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
         <div className="w-24 h-24 rounded-full border-2 border-black dark:border-white flex items-center justify-center mb-4">
           <SendIcon className="w-12 h-12 text-black dark:text-white" />
         </div>
-<<<<<<< HEAD
         <h2 className="text-xl font-medium mb-1">Ваши сообщения</h2>
-=======
-        <h2 className="text-xl font-medium mb-1 dark:text-white">Ваши сообщения</h2>
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
         <p className="text-zinc-500 text-sm mb-6">Отправляйте личные фото и сообщения другу или группе.</p>
         <button onClick={onOpenNewChat} className="bg-[#0095F6] hover:bg-[#1877F2] text-white font-semibold py-1.5 px-4 rounded-lg text-sm">
           Отправить сообщение
@@ -368,13 +364,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, onToggleInfo, isIn
             <img src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-full h-full object-cover" alt="" />
           </div>
           <div className="flex flex-col">
-<<<<<<< HEAD
             <p className="font-bold text-base leading-tight hover:text-zinc-500 cursor-pointer">{otherUserName}</p>
             <p className="text-xs text-zinc-500">{otherUserName?.toLowerCase()}</p>
-=======
-            <p className="font-bold text-base leading-tight hover:text-zinc-500 cursor-pointer dark:text-white">{otherUserName}</p>
-            <p className="text-xs text-zinc-500">{otherUserName.toLowerCase()}</p>
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
           </div>
         </div>
         <div className="flex items-center gap-4 text-zinc-700 dark:text-zinc-300 shrink-0">

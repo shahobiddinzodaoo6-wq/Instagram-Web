@@ -1,9 +1,10 @@
-const UserProfilePage = ({ params }: { params: { username: string } }) => {
-  return (
-    <div>
-      <h1>Profile Page for {params.username}</h1>
-    </div>
-  );
+"use client";
+import React from "react";
+import Profile from "@/src/views/profile/ui/profile";
+
+const UserProfilePage = ({ params }: { params: Promise<{ username: string }> }) => {
+  const { username } = React.use(params);
+  return <Profile username={username} />;
 };
 
 export default UserProfilePage;

@@ -2,16 +2,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-<<<<<<< HEAD
-
-import { Dropdown, MenuProps, Modal, message } from 'antd';
-import { Trash2 } from 'lucide-react';
-
-import { 
-  Settings, 
-  Grid, 
-  Bookmark, 
-  Tag, 
+import { Dropdown, MenuProps, Modal, message, QRCode } from 'antd';
+import {
+  Settings,
+  Grid,
+  Bookmark,
+  Tag,
   Menu,
   Plus,
   QrCode,
@@ -25,35 +21,13 @@ import {
   MoreVertical,
   Music,
   Volume2,
-  VolumeX
-=======
-import {
-    Settings,
-    Grid,
-    Bookmark,
-    Tag,
-    Menu,
-    Plus,
-    QrCode,
-    Bell,
-    LogOut,
-    Play,
-    Heart,
-    MessageCircle,
-    X,
-    Send,
-    MoreVertical,
-    Music,
-    Volume2,
-    VolumeX,
-    Trash2
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
+  VolumeX,
+  Trash2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Dropdown, MenuProps, message, Modal } from 'antd';
 
 const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
-const Profile = () => {
+const Profile = ({ username }: { username?: string }) => {
     const [activeTab, setActiveTab] = useState('posts');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
@@ -68,6 +42,7 @@ const Profile = () => {
     const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
     const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
     // 0. Delete Post Mutation
@@ -119,24 +94,65 @@ const Profile = () => {
         }
     ];
 
-    // 1. Fetch User Profile
-    const { data: userData, isLoading: isProfileLoading } = useQuery({
+    // 1. Fetch User Profile (Either "my" or "target user")
+    const { data: myProfile } = useQuery({
         queryFn: async () => {
             const { data } = await axiosRequest.get(`/UserProfile/get-my-profile`);
             return data.data;
         },
-        queryKey: ['user-profile'],
+        queryKey: ['my-profile'],
     });
+
+    const { data: userData, isLoading: isProfileLoading } = useQuery({
+        queryFn: async () => {
+            if (username && username !== myProfile?.userName) {
+                // Fetch other user by username
+                const { data: searchRes } = await axiosRequest.get(`/User/get-users`, {
+                    params: { UserName: username.trim() }
+                });
+                const foundUser = searchRes.data?.[0];
+                if (!foundUser) throw new Error("User not found");
+                
+                // For now we use search data, if there's a better profile endpoint we'd use it here
+                return {
+                    ...foundUser,
+                    id: foundUser.id || foundUser.userId,
+                };
+            }
+            const { data } = await axiosRequest.get(`/UserProfile/get-my-profile`);
+            return data.data;
+        },
+        queryKey: ['user-profile', username],
+        enabled: !username || !!myProfile, 
+    });
+
+    const isMyProfile = !username || (!!myProfile && !!userData && (
+        String(userData.id || userData.userId) === String(myProfile.id || myProfile.userId) ||
+        userData.userName?.toLowerCase() === myProfile.userName?.toLowerCase()
+    ));
 
     // 2. Fetch User Posts
     const { data: posts, isLoading: isPostsLoading } = useQuery({
         queryFn: async () => {
+            if (!isMyProfile && userData?.id) {
+                const res = await axiosRequest.get(`Post/get-posts`, {
+                    params: { UserId: userData.id }
+                });
+                return res.data.data || res.data;
+            }
             const res = await axiosRequest.get(`Post/get-my-posts`);
             return res.data.data || res.data;
         },
-        queryKey: ['user-posts'],
-        enabled: activeTab === 'posts'
+        queryKey: ['user-posts', userData?.id, isMyProfile],
+        enabled: !!userData?.id
     });
+
+    // 2b. User Reels are derived from posts (filtering for video content)
+    const userReels = posts?.filter((p: any) => {
+        const mediaFile = Array.isArray(p.images) ? p.images[0] : p.images;
+        return typeof mediaFile === 'string' && mediaFile.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
+    }) || [];
+    const isReelsLoading = isPostsLoading;
 
     // 3. Fetch Saved/Favorite Posts
     const { data: savedPosts, isLoading: isSavedLoading } = useQuery({
@@ -303,27 +319,65 @@ const Profile = () => {
                 </div>
 
                 <section className="flex-grow text-gray-800">
-                    <div className="flex flex-wrap items-center mb-5 relative">
+                    <div className="flex items-center mb-5 flex-wrap gap-2">
                         <h2 className="text-xl font-semibold mr-4">{userData?.userName}</h2>
-                        <div className="flex space-x-2 mt-2 sm:mt-0">
-                            <button onClick={() => router.push('/editProfile')} className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 font-semibold rounded-lg text-sm transition-colors">
-                                Edit profile
-                            </button>
-                            <button className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 font-semibold rounded-lg text-sm transition-colors">
-                                View archive
-                            </button>
-                        </div>
-                        <div className="relative">
-                            <button
-                                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="ml-2 p-2 hover:bg-gray-50 rounded-full transition-colors"
-                            >
-                                <Menu className="w-6 h-6" />
-                            </button>
+                        {isMyProfile ? (
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => router.push('/edit-profile')}
+                                    className="px-4 py-1.5 bg-[#efefef] hover:bg-[#dbdbdb] rounded-lg text-sm font-semibold transition-colors"
+                                >
+                                    Edit profile
+                                </button>
+                                <button className="px-4 py-1.5 bg-[#efefef] hover:bg-[#dbdbdb] rounded-lg text-sm font-semibold transition-colors">
+                                    View archive
+                                </button>
+                                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                    <Settings className="w-6 h-6" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => {
+                                        if (userData?.isFollowing) {
+                                            unfollowUserMutation.mutate(userData.id || userData.userId);
+                                        } else {
+                                            followUserMutation.mutate(userData.id || userData.userId);
+                                        }
+                                    }}
+                                    className={`px-6 py-1.5 rounded-lg text-sm font-bold transition-all ${userData?.isFollowing 
+                                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-900' 
+                                        : 'bg-[#0095F6] hover:bg-[#1877F2] text-white'
+                                    }`}
+                                >
+                                    {userData?.isFollowing ? 'Following' : 'Follow'}
+                                </button>
+                                <button className="px-4 py-1.5 bg-[#efefef] hover:bg-[#dbdbdb] rounded-lg text-sm font-semibold transition-colors">
+                                    Message
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="relative ml-2">
+                            {isMyProfile && (
+                                <button
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                >
+                                    <Menu className="w-6 h-6" />
+                                </button>
+                            )}
 
                             {isMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-[250px] bg-white rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.1)] py-2 z-50">
-                                    <button className="w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 text-left transition-colors">
+                                    <button 
+                                        onClick={() => {
+                                            setIsQrModalOpen(true);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 text-left transition-colors"
+                                    >
                                         <QrCode className="w-5 h-5" />
                                         <span>QR code</span>
                                     </button>
@@ -394,13 +448,15 @@ const Profile = () => {
                         <Play className="w-3 h-3" />
                         <span>Reels</span>
                     </button>
+                    {isMyProfile && (
                     <button
                         onClick={() => setActiveTab('saved')}
-                        className={`flex items-center space-x-1.5 py-4 uppercase tracking-widest text-xs font-semibold border-t ${activeTab === 'saved' ? 'border-black text-black' : 'border-transparent text-gray-500'}`}
+                        className={`flex items-center space-x-2 py-4 border-t transition-colors ${activeTab === 'saved' ? 'border-black text-black' : 'border-transparent text-gray-400'}`}
                     >
                         <Bookmark className="w-3 h-3" />
-                        <span>Saved</span>
+                        <span className="text-xs font-bold tracking-widest uppercase">Saved</span>
                     </button>
+                )}
                 </div>
             </div>
 
@@ -410,43 +466,32 @@ const Profile = () => {
                     <div className="grid grid-cols-3 gap-1 md:gap-8">
                         {isReelsLoading ? (
                             <div className="col-span-3 text-center py-10">Loading reels...</div>
-                        ) : (() => {
-                            // Combine reels from API with video posts from the general posts array
-                            const videoPosts = posts?.filter((p: any) => {
-                                const mediaFile = Array.isArray(p.images) ? p.images[0] : p.images;
-                                return typeof mediaFile === 'string' && mediaFile.match(/\.(mp4|mov|avi|webm|mkv)$|video/i);
-                            }) || [];
-                            
-                            // Deduplicate by ID
-                            const allReels = [...(reels || [])];
-                            videoPosts.forEach((vp: any) => {
-                                if (!allReels.find((r: any) => (r.postId || r.id) === (vp.postId || vp.id))) {
-                                    allReels.push(vp);
-                                }
-                            });
-
-                            return allReels.length > 0 ? (
-                                allReels.map((reel: any) => (
-                                    <div 
-                                        key={reel.postId || reel.id} 
-                                        onClick={() => setSelectedReel(reel)}
-                                        className="aspect-[9/16] relative group cursor-pointer overflow-hidden bg-black flex items-center justify-center"
-                                    >
-                                        <video 
-                                            src={`${BASE_IMAGE_URL}${Array.isArray(reel.images) ? reel.images[0] : reel.images}`} 
-                                            className="w-full h-full object-cover"
-                                            muted
-                                            loop
-                                        />
-                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold z-10">
-                                            <span className="flex items-center"><Play className="w-6 h-6 mr-1 fill-white" /> {reel.postLikeCount || 0}</span>
-                                        </div>
+                        ) : userReels.length > 0 ? (
+                            userReels.map((reel: any) => (
+                                <div 
+                                    key={reel.postId || reel.id || Math.random()} 
+                                    onClick={() => setSelectedReel(reel)}
+                                    className="aspect-[9/16] relative group cursor-pointer overflow-hidden bg-black flex items-center justify-center rounded-sm"
+                                >
+                                    <video 
+                                        src={`${BASE_IMAGE_URL}${Array.isArray(reel.images) ? reel.images[0] : reel.images}`} 
+                                        className="w-full h-full object-cover"
+                                        muted
+                                        loop
+                                        onMouseOver={(e) => e.currentTarget.play()}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.pause();
+                                            e.currentTarget.currentTime = 0;
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold z-10">
+                                        <span className="flex items-center"><Play className="w-6 h-6 mr-1 fill-white" /> {reel.postLikeCount || 0}</span>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="col-span-3 text-center py-20 text-gray-500 font-medium">No reels yet</div>
-                            );
-                        })()}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-3 text-center py-20 text-gray-500 font-medium">No reels yet</div>
+                        )}
                     </div>
                 )}
                 {activeTab === 'posts' && (
@@ -455,10 +500,12 @@ const Profile = () => {
                             <div className="col-span-3 text-center py-10">Loading posts...</div>
                         ) : posts?.length > 0 ? (
                             posts.map((post: any) => (
-<<<<<<< HEAD
                                 <div 
                                     key={post.postId || post.id} 
-                                    onClick={() => setSelectedPostId(post.postId || post.id)}
+                                    onClick={() => {
+                                        setSelectedPostId(post.postId || post.id);
+                                        setInitialPostImage(post.images ? `${BASE_IMAGE_URL}${post.images}` : null);
+                                    }}
                                     className="aspect-square relative group cursor-pointer overflow-hidden bg-black flex items-center justify-center"
                                 >
                                     {(() => {
@@ -481,22 +528,6 @@ const Profile = () => {
                                         );
                                     })()}
                                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold space-x-4 z-10">
-=======
-                                <div
-                                    key={post.postId || post.id}
-                                    onClick={() => {
-                                        setSelectedPostId(post.postId || post.id);
-                                        setInitialPostImage(post.images ? `${BASE_IMAGE_URL}${post.images}` : null);
-                                    }}
-                                    className="aspect-square relative group cursor-pointer overflow-hidden bg-gray-100"
-                                >
-                                    <img
-                                        src={post.images ? `${BASE_IMAGE_URL}${post.images}` : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=500&h=500&fit=crop"}
-                                        alt=""
-                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold space-x-4">
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
                                         <span className="flex items-center"><Heart className="w-5 h-5 mr-2 fill-white" /> {post.postLikeCount || 0}</span>
                                         <span className="flex items-center"><MessageCircle className="w-5 h-5 mr-2 fill-white" /> {post.commentCount || 0}</span>
                                     </div>
@@ -562,7 +593,6 @@ const Profile = () => {
 
                     <div className="bg-white w-full max-w-[1200px] h-[90vh] flex flex-col md:flex-row rounded-sm overflow-hidden">
                         {/* Post Image Container */}
-<<<<<<< HEAD
                         <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full overflow-hidden">
                             {(() => {
                                 const mediaPath = Array.isArray(postDetails?.images) ? postDetails?.images[0] : postDetails?.images;
@@ -580,20 +610,12 @@ const Profile = () => {
                                     />
                                 ) : (
                                     <img 
-                                        src={mediaPath ? fullUrl : "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
+                                        src={mediaPath ? fullUrl : initialPostImage || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"} 
                                         alt="" 
                                         className="max-h-full max-w-full object-contain" 
                                     />
                                 );
                             })()}
-=======
-                        <div className="flex-[1.5] bg-black flex items-center justify-center relative group h-1/2 md:h-full">
-                            <img
-                                src={postDetails?.images ? `${BASE_IMAGE_URL}${postDetails.images}` : initialPostImage || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&h=800&fit=crop"}
-                                alt=""
-                                className="max-h-full max-w-full object-contain"
-                            />
->>>>>>> 916ec68d498bbbb1da95551a7519c1970eaae011
                         </div>
 
                         {/* Post Info & Comments */}
@@ -854,6 +876,57 @@ const Profile = () => {
                     </div>
                 </div>
             )}
+            {/* QR Code Modal */}
+            <Modal
+                title={null}
+                open={isQrModalOpen}
+                onCancel={() => setIsQrModalOpen(false)}
+                footer={null}
+                centered
+                width={420}
+                className="qr-modal"
+                styles={{
+                    content: {
+                        padding: 0,
+                        overflow: 'hidden',
+                        borderRadius: '24px',
+                    }
+                }}
+            >
+                <div className="flex flex-col items-center">
+                    <div className="w-full bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045] pt-12 pb-12 px-8 flex flex-col items-center">
+                        <div className="bg-white p-6 rounded-[32px] shadow-2xl relative">
+                            <QRCode
+                                value={typeof window !== 'undefined' ? `${window.location.origin}/${userData?.userName}` : ''}
+                                size={240}
+                                bordered={false}
+                                errorLevel="H"
+                            />
+                        </div>
+                        <div className="mt-8 text-center text-white">
+                            <h2 className="text-2xl font-bold tracking-tight">@{userData?.userName}</h2>
+                            <p className="text-white/80 text-sm mt-1 font-medium">Scan to follow me on Instagram</p>
+                        </div>
+                    </div>
+                    <div className="w-full p-4 flex flex-col space-y-2 bg-white">
+                        <button 
+                            onClick={() => {
+                                navigator.clipboard.writeText(`${window.location.origin}/${userData?.userName}`);
+                                message.success("Link copied to clipboard!");
+                            }}
+                            className="w-full py-3 font-bold text-sm text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
+                        >
+                            Copy Link
+                        </button>
+                        <button 
+                            onClick={() => setIsQrModalOpen(false)}
+                            className="w-full py-3 font-bold text-sm text-gray-400 hover:bg-gray-50 rounded-xl transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };
