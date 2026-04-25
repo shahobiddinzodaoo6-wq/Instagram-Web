@@ -186,20 +186,27 @@ const Profile = ({ username }: { username?: string }) => {
     const isCurrentlyFollowing = isFollowingLocal !== null ? isFollowingLocal : (userData?.isFollowing ?? false);
 
     // 2. Fetch User Posts
-    const { data: posts, isLoading: isPostsLoading } = useQuery({
+    const { data: postsData, isLoading: isPostsLoading } = useQuery({
         queryFn: async () => {
-            if (!isMyProfile && userData?.id) {
-                const res = await axiosRequest.get(`Post/get-posts`, {
+            if (username && !isMyProfile && userData?.id) {
+                const res = await axiosRequest.get(`/Post/get-posts`, {
                     params: { UserId: userData.id }
                 });
                 return res.data.data || res.data;
             }
-            const res = await axiosRequest.get(`Post/get-my-posts`);
+            const res = await axiosRequest.get(`/Post/get-my-posts`);
             return res.data.data || res.data;
         },
+<<<<<<< HEAD
         queryKey: ['user-posts', userData?.id, isMyProfile],
         enabled: (activeTab === 'posts' || activeTab === 'reels') && !!userData?.id
+=======
+        queryKey: ['user-posts', username, userData?.id, isMyProfile],
+        enabled: !isProfileLoading
+>>>>>>> 296d2ea4eee6019da83f41667417a55e8c6dce02
     });
+
+    const posts = Array.isArray(postsData) ? postsData : (postsData?.data || []);
 
     // 2b. User Reels are derived from posts (filtering for video content)
     const userReels = posts?.filter((p: any) => {
