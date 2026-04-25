@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { axiosRequest } from "../(auth)/accounts/login/token";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile, ChevronRight, ChevronLeft, X, CheckCircle2, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile, ChevronRight, ChevronLeft, X, CheckCircle2, Trash2, Plus } from "lucide-react";
 
 const api = "https://instagram-api.softclub.tj";
 const imageUrl = "https://instagram-api.softclub.tj/images"; 
@@ -15,12 +15,12 @@ const getFullImageUrl = (imageName: string | null) => {
 };
 
 let mockStories = [
-  { id: 1, author: 'xollllova', avatar: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg', hasStory: false, image: 'https://picsum.photos/400/800?1' },
-  { id: 2, author: 'amircargo', avatar: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg', hasStory: true, image: 'https://picsum.photos/400/800?2' },
-  { id: 3, author: 'softclub.st...', avatar: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg', hasStory: true, image: 'https://picsum.photos/400/800?3' },
-  { id: 4, author: '_mustafo_4l', avatar: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg', hasStory: true, image: 'https://picsum.photos/400/800?4' },
-  { id: 5, author: 'fazliddinjo...', avatar: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg', hasStory: true, image: 'https://picsum.photos/400/800?5' },
-  { id: 6, author: 'najibulloh....', avatar: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg', hasStory: true, image: 'https://picsum.photos/400/800?6' },
+  { id: 1, author: 'xollllova', avatar: '', hasStory: false, image: 'https://picsum.photos/400/800?1' },
+  { id: 2, author: 'amircargo', avatar: '', hasStory: true, image: 'https://picsum.photos/400/800?2' },
+  { id: 3, author: 'softclub.st...', avatar: '', hasStory: true, image: 'https://picsum.photos/400/800?3' },
+  { id: 4, author: '_mustafo_4l', avatar: '', hasStory: true, image: 'https://picsum.photos/400/800?4' },
+  { id: 5, author: 'fazliddinjo...', avatar: '', hasStory: true, image: 'https://picsum.photos/400/800?5' },
+  { id: 6, author: 'najibulloh....', avatar: '', hasStory: true, image: 'https://picsum.photos/400/800?6' },
 ];
 
 const mockSuggestions = [
@@ -33,20 +33,67 @@ const mockSuggestions = [
 
 const StoryViewer = ({ stories, initialIndex, onClose }: { stories: any[], initialIndex: number, onClose: () => void }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const story = stories[currentIndex];
+
+  const DURATION = 3000; // 3 seconds
+  const TICK = 50; // ms per tick
 
   const goNext = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (currentIndex < stories.length - 1) setCurrentIndex((c) => c + 1);
+    if (currentIndex < stories.length - 1) {
+      setCurrentIndex((c) => c + 1);
+      setProgress(0);
+    } else {
+      onClose();
+    }
   };
   const goPrev = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (currentIndex > 0) setCurrentIndex((c) => c - 1);
+    if (currentIndex > 0) {
+      setCurrentIndex((c) => c - 1);
+      setProgress(0);
+    }
   };
 
-  const file = story.image || story.file || story.mediaPath || story.fileName || story.storyImage || story.images?.[0];
-  const mediaUrl = file?.startsWith('http') ? file : getFullImageUrl(file);
-  const isVideo = file?.endsWith(".mp4") || file?.endsWith(".mov") || story.isVideo;
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
+
+  useEffect(() => {
+    setProgress(0);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (paused) return;
+    let tick = 0;
+    const totalTicks = DURATION / TICK;
+    intervalRef.current = setInterval(() => {
+      tick++;
+      const pct = (tick / totalTicks) * 100;
+      setProgress(Math.min(pct, 100));
+      if (tick >= totalTicks) {
+        clearInterval(intervalRef.current!);
+        const c = currentIndexRef.current;
+        if (c < stories.length - 1) {
+          setCurrentIndex(c + 1);
+        } else {
+          onClose();
+        }
+      }
+    }, TICK);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [currentIndex, paused]);
+
+  // DEBUG: log all story fields to see what API returns
+  console.log("Story object:", JSON.stringify(story, null, 2));
+
+  const nestedStory = story.stories?.[0];
+  console.log("Nested story:", JSON.stringify(nestedStory, null, 2));
+
+  const file = nestedStory?.imageUrl || nestedStory?.image || nestedStory?.file || nestedStory?.mediaPath || nestedStory?.fileName || nestedStory?.storyImage || nestedStory?.url
+    || story.image || story.file || story.mediaPath || story.fileName || story.storyImage || story.images?.[0] || story.imageUrl || story.url;
+  const mediaUrl = file ? (file.startsWith('http') ? file : getFullImageUrl(file)) : null;
+  const isVideo = file?.endsWith(".mp4") || file?.endsWith(".mov") || story.isVideo || nestedStory?.isVideo;
 
   const uName = story.userName || story.author || "User";
   const avatar = getFullImageUrl(story.userImage || story.avatar) || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
@@ -80,9 +127,16 @@ const StoryViewer = ({ stories, initialIndex, onClose }: { stories: any[], initi
         onClick={(e) => e.stopPropagation()} 
       >
         <div className="absolute top-2 w-full px-2 flex gap-1 z-20">
-           <div className="h-[2px] bg-white/50 w-full rounded-full overflow-hidden">
-              <div className="h-full bg-white w-full rounded-full"></div>
-           </div>
+          {stories.map((_: any, i: number) => (
+            <div key={i} className="flex-1 h-[2px] bg-white/30 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-none"
+                style={{
+                  width: i < currentIndex ? '100%' : i === currentIndex ? `${progress}%` : '0%',
+                }}
+              />
+            </div>
+          ))}
         </div>
 
         <div className="absolute top-4 w-full p-4 flex items-center justify-between z-20">
@@ -112,7 +166,10 @@ const StoryViewer = ({ stories, initialIndex, onClose }: { stories: any[], initi
 };
 
 const StorySection = () => {
-  const [activeStoryIdx, setActiveStoryIdx] = useState<number | null>(null);
+  const queryClient = useQueryClient();
+  const [activeUserId, setActiveUserId] = useState<string | null>(null);
+  const [activeUserStories, setActiveUserStories] = useState<any[]>([]);
+  const [loadingStories, setLoadingStories] = useState(false);
 
   const { data: storiesObj } = useQuery({
     queryKey: ["getStories"],
@@ -122,26 +179,113 @@ const StorySection = () => {
     },
   });
 
+  // Also fetch my own stories
+  const { data: myStoriesData, refetch: refetchMyStories } = useQuery({
+    queryKey: ["getMyStories"],
+    queryFn: async () => {
+      const { data } = await axiosRequest.get(`${api}/Story/get-my-stories`);
+      return Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+    },
+  });
+
   const displayStories = storiesObj && storiesObj.length > 0 ? storiesObj : mockStories;
+
+  const addStoryMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("Image", file);
+      // Try without PostId - server returns 500 for PostId=0
+      const { data } = await axiosRequest.post(`${api}/Story/AddStories`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log("AddStories response:", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getStories"] });
+      queryClient.invalidateQueries({ queryKey: ["getMyStories"] });
+    },
+    onError: (err: any) => {
+      console.error("AddStories error:", err?.response?.data);
+    }
+  });
+
+  const handleAddStory = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) addStoryMutation.mutate(file);
+  };
+
+  const openUserStories = async (userId: string) => {
+    setLoadingStories(true);
+    try {
+      const { data: raw } = await axiosRequest.get(`${api}/Story/get-user-stories/${userId}`);
+      console.log("get-user-stories RAW:", JSON.stringify(raw, null, 2));
+      const stories = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : raw?.data ? [raw.data] : [];
+      console.log("User stories parsed:", stories);
+      if (stories.length > 0) {
+        setActiveUserStories(stories);
+        setActiveUserId(userId);
+      }
+    } catch (e) {
+      console.error("Failed to fetch user stories", e);
+    }
+    setLoadingStories(false);
+  };
+
+  const openMyStories = async () => {
+    setLoadingStories(true);
+    try {
+      const { data: raw } = await axiosRequest.get(`${api}/Story/get-my-stories`);
+      console.log("get-my-stories RAW:", JSON.stringify(raw, null, 2));
+      const stories = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : raw?.data ? [raw.data] : [];
+      console.log("My stories parsed:", stories);
+      if (stories.length > 0) {
+        setActiveUserStories(stories);
+        setActiveUserId("me");
+      }
+    } catch (e) {
+      console.error("Failed to fetch my stories", e);
+    }
+    setLoadingStories(false);
+  };
 
   return (
     <>
       <div className="bg-white py-4 flex gap-4 overflow-x-auto relative mb-4 w-full max-w-[470px] mt-8 mx-auto scrollbar-hide">
+        {/* My story bubble */}
+        <div className="flex flex-col items-center gap-1 min-w-[72px] shrink-0">
+          <div className="relative">
+            {/* Click on avatar to VIEW your stories */}
+            <div
+              className={`w-[66px] h-[66px] rounded-full p-[2px] cursor-pointer ${myStoriesData && myStoriesData.length > 0 ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200'}`}
+              onClick={openMyStories}
+            >
+              <div className="bg-white p-[2px] rounded-full w-full h-full">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg" alt="You" className="rounded-full w-full h-full object-cover" />
+              </div>
+            </div>
+            {/* Plus button to ADD story */}
+            <label className="absolute bottom-1 right-0 bg-[#0095f6] text-white rounded-full border-2 border-white w-[22px] h-[22px] flex items-center justify-center cursor-pointer z-10">
+              <input type="file" accept="image/*" className="hidden" onChange={handleAddStory} disabled={addStoryMutation.isPending} />
+              {addStoryMutation.isPending
+                ? <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                : <Plus className="w-3 h-3" />
+              }
+            </label>
+          </div>
+          <span className="text-xs text-[#8e8e8e] truncate text-center font-normal mt-0.5">Your story</span>
+        </div>
+
         {displayStories.map((story: any, idx: number) => {
           const avatarUrl = getFullImageUrl(story.userImage || story.avatar) || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
           const uName = story.userName || story.author || "User";
-          
-          const hasMedia = story.image || story.file || story.mediaPath || story.fileName || story.storyImage || story.images?.length > 0;
-          const dateField = story.datePublished || story.createdAt || story.date;
-          const isWithin24h = dateField 
-               ? (new Date().getTime() - new Date(dateField).getTime() < 24 * 60 * 60 * 1000) 
-               : true;
-
-          const hasStoryHighlight = story.hasStory !== false && hasMedia && isWithin24h; 
-          
+          const hasStories = (story.stories && story.stories.length > 0) || story.hasStory === true || story.id;
           return (
-            <div key={story.id || story.storyId || idx} onClick={() => setActiveStoryIdx(idx)} className="flex flex-col items-center gap-1 cursor-pointer min-w-[72px]">
-              <div className={`w-[66px] h-[66px] rounded-full p-[2px] ${hasStoryHighlight ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200'}`}>
+            <div
+              key={story.userId || story.id || idx}
+              onClick={() => story.userId ? openUserStories(story.userId) : null}
+              className="flex flex-col items-center gap-1 cursor-pointer min-w-[72px]"
+            >
+              <div className={`w-[66px] h-[66px] rounded-full p-[2px] ${hasStories ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200'}`}>
                 <div className="bg-white p-[2px] rounded-full w-full h-full">
                   <img src={avatarUrl} alt={uName} className="rounded-full w-full h-full object-cover" />
                 </div>
@@ -155,18 +299,26 @@ const StorySection = () => {
         </button>
       </div>
 
-      {activeStoryIdx !== null && displayStories[activeStoryIdx] && (
-        <StoryViewer 
-           stories={displayStories} 
-           initialIndex={activeStoryIdx} 
-           onClose={() => setActiveStoryIdx(null)} 
+      {loadingStories && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+
+      {activeUserId !== null && activeUserStories.length > 0 && (
+        <StoryViewer
+          stories={activeUserStories}
+          initialIndex={0}
+          onClose={() => { setActiveUserId(null); setActiveUserStories([]); }}
         />
       )}
     </>
   );
 };
 
-import { useEffect } from "react";
+
+
+
 
 const RightSidebar = () => {
   const [currentUser, setCurrentUser] = useState<any>({

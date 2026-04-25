@@ -48,11 +48,10 @@ const ChatItem: React.FC<{
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-<<<<<<< HEAD
+
         <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{otherUserName || "User"}</p>
-=======
+
         <p className="font-medium text-sm text-zinc-900">{chat.receiveUserName}</p>
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
         {lastMessage && (
           <p className="text-zinc-500 text-xs truncate">
             {lastMessage.messageText} · {new Date(lastMessage.sendMassageDate).getHours()} ч.
@@ -92,11 +91,11 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
         <button onClick={onNewChat} className="p-1 hover:bg-zinc-100 rounded-full transition-colors">
           <SquarePen className="w-6 h-6" />
         </button>
-      </div>
+      </div>    
 
       {/* Notes / Recommended Users */}
       <div className="px-5 mb-6">
-<<<<<<< HEAD
+
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
           <div className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
             <div className="relative">
@@ -128,44 +127,6 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
                         className="w-full h-full object-cover"
                         alt={user.userName}
                       />
-=======
-         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-            <div className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
-               <div className="relative">
-                  <div className="w-[72px] h-[72px] rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200 overflow-hidden">
-                     <img 
-                       src={profile?.image ? `${urlImage}/${profile.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-                       className="w-full h-full object-cover opacity-50 grayscale group-hover:opacity-100 transition-opacity" 
-                       alt="" 
-                     />
-                  </div>
-                  <div className="absolute -top-3 -left-1 bg-white border border-zinc-200 px-3 py-1.5 rounded-2xl text-[11px] shadow-sm max-w-[90px] text-zinc-500 leading-tight">
-                    Пусть здесь будет комфортно...
-                  </div>
-                  <div className="absolute bottom-0 right-0 bg-[#0095F6] rounded-full border-2 border-white w-6 h-6 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">+</span>
-                  </div>
-               </div>
-               <span className="text-[11px] text-zinc-500 mt-1">Ваша заметка</span>
-            </div>
-            
-            {recommendedUsers.slice(0, 5).map((user, i) => (
-               <div key={user.id || i} className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
-                  <div className="relative">
-                    <div className="w-[72px] h-[72px] rounded-full p-[2.5px] bg-gradient-to-tr from-[#FFD600] via-[#FF7A00] to-[#FF0069]">
-                       <div className="w-full h-full rounded-full bg-white p-[2px]">
-                          <div className="w-full h-full rounded-full bg-zinc-200 overflow-hidden">
-                             <img 
-                               src={user.image ? `${urlImage}/${user.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-                               className="w-full h-full object-cover" 
-                               alt={user.userName} 
-                             />
-                          </div>
-                       </div>
-                    </div>
-                    <div className="absolute -top-3 -left-1 bg-white border border-zinc-200 px-3 py-1.5 rounded-2xl text-[11px] shadow-sm max-w-[90px] truncate leading-tight group-hover:scale-105 transition-transform">
-                      {user.userName}
->>>>>>> 34537525fbd5953ea71dc83dfc2822285cdf4a73
                     </div>
                   </div>
                 </div>

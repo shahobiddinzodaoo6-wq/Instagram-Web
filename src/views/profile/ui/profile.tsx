@@ -2,11 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-<<<<<<< HEAD
+
 import { Dropdown, MenuProps, Modal, message } from 'antd';
 import { Trash2 } from 'lucide-react';
-=======
->>>>>>> 712bf2fd65c0b2d8cd702d43abdd2b010aaec12f
+
+
 import { 
   Settings, 
   Grid, 
@@ -41,7 +41,6 @@ const Profile = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
     const videoRef = useRef<HTMLVideoElement>(null);
-    const queryClient = useQueryClient();
 
     // 0. Delete Post Mutation
     const deletePost = useMutation({
