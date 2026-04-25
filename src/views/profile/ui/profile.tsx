@@ -197,13 +197,8 @@ const Profile = ({ username }: { username?: string }) => {
             const res = await axiosRequest.get(`/Post/get-my-posts`);
             return res.data.data || res.data;
         },
-<<<<<<< HEAD
-        queryKey: ['user-posts', userData?.id, isMyProfile],
-        enabled: (activeTab === 'posts' || activeTab === 'reels') && !!userData?.id
-=======
         queryKey: ['user-posts', username, userData?.id, isMyProfile],
-        enabled: !isProfileLoading
->>>>>>> 296d2ea4eee6019da83f41667417a55e8c6dce02
+        enabled: !isProfileLoading && !!userData?.id
     });
 
     const posts = Array.isArray(postsData) ? postsData : (postsData?.data || []);
