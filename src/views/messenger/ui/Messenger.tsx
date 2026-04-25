@@ -37,6 +37,7 @@ export const Messenger = () => {
         selectedChatId={selectedChat?.chatId}
       />
       <ChatWindow 
+        key={selectedChat?.chatId ?? 'no-chat'}
         chat={selectedChat} 
         onToggleInfo={() => setShowInfo(!showInfo)} 
         isInfoOpen={showInfo}

@@ -33,8 +33,8 @@ const ChatItem: React.FC<{
   return (
     <div
       onClick={() => onSelect(chat)}
-      className={`flex items-center gap-3 px-5 py-2 cursor-pointer hover:bg-zinc-50 transition-colors ${
-        isSelected ? "bg-zinc-50" : ""
+      className={`flex items-center gap-3 px-5 py-2 cursor-pointer transition-colors ${
+        isSelected ? 'bg-zinc-100' : 'hover:bg-zinc-50'
       }`}
     >
       <div className="relative shrink-0">
@@ -47,10 +47,10 @@ const ChatItem: React.FC<{
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{otherUserName || "User"}</p>
+        <p className="font-semibold text-sm text-zinc-900">{otherUserName || "User"}</p>
         {lastMessage && (
-          <p className="text-zinc-500 text-xs truncate">
-            {lastMessage.messageText} · {new Date(lastMessage.sendMassageDate).getHours()} ч.
+          <p className="text-zinc-500 text-xs truncate mt-0.5">
+            {lastMessage.messageText} · {new Date(lastMessage.sendMassageDate).getHours()}ч.
           </p>
         )}
       </div>
