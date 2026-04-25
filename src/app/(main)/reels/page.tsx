@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
     Heart,
     MessageCircle,
@@ -18,6 +19,7 @@ import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
 
 const ReelItem = ({ reel, muted }: any) => {
+    const router = useRouter();
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [showComments, setShowComments] = useState(false);
@@ -130,10 +132,11 @@ const ReelItem = ({ reel, muted }: any) => {
                         <div className="flex items-center gap-3 mb-3">
                             <img 
                                 src={reel.userImage ? `${BASE_IMAGE_URL}${reel.userImage}` : "https://i.pravatar.cc/150"} 
-                                className="h-9 w-9 rounded-full border border-zinc-400 object-cover" 
+                                className="h-9 w-9 rounded-full border border-zinc-400 object-cover cursor-pointer" 
                                 alt="user"
+                                onClick={() => router.push(`/${reel.userName}`)}
                             />
-                            <span className="text-sm font-semibold hover:underline cursor-pointer">{reel.userName || "user"}</span>
+                            <span className="text-sm font-semibold hover:underline cursor-pointer" onClick={() => router.push(`/${reel.userName}`)}>{reel.userName || "user"}</span>
                             <button 
                                 onClick={handleFollow}
                                 className={`text-[12px] font-bold border px-4 py-1 rounded-md transition-all ${isFollowing ? "bg-white text-black border-white" : "border-white/70 hover:bg-white/10"}`}

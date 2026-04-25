@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { axiosRequest } from "../(auth)/accounts/login/token";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile, ChevronRight, ChevronLeft, X, CheckCircle2, Trash2 } from "lucide-react";
 
@@ -113,6 +114,7 @@ const StoryViewer = ({ stories, initialIndex, onClose }: { stories: any[], initi
 
 const StorySection = () => {
   const [activeStoryIdx, setActiveStoryIdx] = useState<number | null>(null);
+  const router = useRouter();
 
   const { data: storiesObj } = useQuery({
     queryKey: ["getStories"],
@@ -142,11 +144,27 @@ const StorySection = () => {
           return (
             <div key={story.id || story.storyId || idx} onClick={() => setActiveStoryIdx(idx)} className="flex flex-col items-center gap-1 cursor-pointer min-w-[72px]">
               <div className={`w-[66px] h-[66px] rounded-full p-[2px] ${hasStoryHighlight ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200'}`}>
-                <div className="bg-white p-[2px] rounded-full w-full h-full">
+                <div 
+                  className="bg-white p-[2px] rounded-full w-full h-full"
+                  onClick={(e) => {
+                    if (!hasStoryHighlight) {
+                      e.stopPropagation();
+                      router.push(`/${uName}`);
+                    }
+                  }}
+                >
                   <img src={avatarUrl} alt={uName} className="rounded-full w-full h-full object-cover" />
                 </div>
               </div>
-              <span className="text-xs text-black w-16 truncate text-center font-normal">{uName}</span>
+              <span 
+                className="text-xs text-black w-16 truncate text-center font-normal hover:underline cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/${uName}`);
+                }}
+              >
+                {uName}
+              </span>
             </div>
           );
         })}
@@ -169,6 +187,7 @@ const StorySection = () => {
 import { useEffect } from "react";
 
 const RightSidebar = () => {
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>({
     username: "User",
     name: "User",
@@ -190,10 +209,10 @@ const RightSidebar = () => {
   return (
     <div className="w-[320px] hidden lg:block sticky top-8 text-sm mt-8">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3 cursor-pointer">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/${currentUser.username}`)}>
           <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg" alt="Profile" className="w-[44px] h-[44px] rounded-full object-cover" />
           <div className="flex flex-col">
-            <span className="font-semibold text-black hover:opacity-70 transition">{currentUser.username}</span>
+            <span className="font-semibold text-black hover:underline transition">{currentUser.username}</span>
             <span className="text-gray-500 text-sm">{currentUser.name}</span>
           </div>
         </div>
@@ -208,10 +227,10 @@ const RightSidebar = () => {
       <div className="flex flex-col gap-4">
         {mockSuggestions.map(user => (
           <div key={user.id} className="flex items-center justify-between">
-             <div className="flex items-center gap-3 cursor-pointer">
+             <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/${user.username}`)}>
                <img src={user.avatar} alt={user.username} className="w-[44px] h-[44px] rounded-full object-cover" />
                <div className="flex flex-col">
-                 <span className="font-semibold text-black hover:opacity-70 transition text-sm">{user.username}</span>
+                 <span className="font-semibold text-black hover:underline transition text-sm">{user.username}</span>
                  <span className="text-gray-500 text-[12px] truncate max-w-[170px]">{user.description}</span>
                </div>
              </div>
@@ -233,6 +252,7 @@ const RightSidebar = () => {
 };
 
 const PostItem = ({ post }: { post: any }) => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [commentText, setCommentText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -334,14 +354,14 @@ const PostItem = ({ post }: { post: any }) => {
     <div className="bg-white w-full max-w-[470px] mb-3 mx-auto flex flex-col text-sm text-[#262626]">
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-1 py-3">
-        <div className="flex items-center gap-3 cursor-pointer">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/${post.userName}`)}>
           <div className="w-[42px] h-[42px] rounded-full bg-gradient-to-tr from-[#FEDA75] via-[#FA7E1E] via-[#D62976] via-[#962FBF] to-[#4F5BD5] p-[3px]">
             <div className="bg-white p-[2px] rounded-full w-full h-full">
               <img src={userAvatarFullUrl} alt="avatar" className="rounded-full w-full h-full object-cover" />
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-[13px] hover:opacity-60 transition">{post.userName}</span>
+            <span className="font-semibold text-[13px] hover:underline transition">{post.userName}</span>
             <span className="text-[#8e8e8e] text-[13px] font-normal">• 1h</span>
           </div>
         </div>
@@ -400,7 +420,7 @@ const PostItem = ({ post }: { post: any }) => {
 
       {/* ── Caption ── */}
       <div className="px-1 pb-1">
-        <span className="font-semibold text-[14px] mr-1 cursor-pointer">{post.userName}</span>
+        <span className="font-semibold text-[14px] mr-1 cursor-pointer hover:underline" onClick={() => router.push(`/${post.userName}`)}>{post.userName}</span>
         <span className="text-[14px]">{post.content}</span>
       </div>
 
@@ -416,7 +436,7 @@ const PostItem = ({ post }: { post: any }) => {
       {/* ── Last Comment Preview ── */}
       {post.comments && post.comments.length > 0 && (
         <div className="px-1 pb-1.5">
-          <span className="font-semibold text-[14px] mr-1 cursor-pointer">{post.comments[0].userName}</span>
+          <span className="font-semibold text-[14px] mr-1 cursor-pointer hover:underline" onClick={() => router.push(`/${post.comments[0].userName}`)}>{post.comments[0].userName}</span>
           <span className="text-[14px]">{post.comments[0].comment}</span>
         </div>
       )}
@@ -492,9 +512,9 @@ const PostItem = ({ post }: { post: any }) => {
 
             <div className="w-full md:w-[405px] flex flex-col h-[50vh] md:h-full bg-white shrink-0 border-l border-[#efefef]">
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#efefef] shrink-0">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/${post.userName}`)}>
                    <img src={userAvatarFullUrl} className="w-8 h-8 rounded-full object-cover" alt="Avatar" />
-                   <span className="font-semibold text-[14px]">{post.userName}</span>
+                   <span className="font-semibold text-[14px] hover:underline">{post.userName}</span>
                 </div>
                 <MoreHorizontal className="w-6 h-6 cursor-pointer text-[#262626]" />
               </div>
@@ -502,10 +522,15 @@ const PostItem = ({ post }: { post: any }) => {
               <div className="flex-1 overflow-y-auto px-4 py-4 text-[14px] space-y-4">
                  {post.content && (
                     <div className="flex gap-3">
-                       <img src={userAvatarFullUrl} className="w-8 h-8 rounded-full shrink-0 object-cover" alt="Avatar" />
+                       <img 
+                          src={userAvatarFullUrl} 
+                          className="w-8 h-8 rounded-full shrink-0 object-cover cursor-pointer" 
+                          alt="Avatar" 
+                          onClick={() => router.push(`/${post.userName}`)}
+                        />
                        <div className="flex flex-col">
                           <div>
-                            <span className="font-semibold mr-1.5">{post.userName}</span>
+                            <span className="font-semibold mr-1.5 cursor-pointer hover:underline" onClick={() => router.push(`/${post.userName}`)}>{post.userName}</span>
                             <span>{post.content}</span>
                           </div>
                           <span className="text-[12px] text-[#8e8e8e] mt-2">1h</span>
@@ -518,10 +543,15 @@ const PostItem = ({ post }: { post: any }) => {
                     const commentId = comment.postCommentId || comment.commentId || comment.id;
                     return (
                       <div key={commentId || idx} className="flex gap-3 group px-2 py-1 -mx-2 hover:bg-gray-50 rounded transition-colors">
-                         <img src={cAvatar} className="w-8 h-8 rounded-full shrink-0 object-cover" alt="Avatar" />
+                         <img 
+                            src={cAvatar} 
+                            className="w-8 h-8 rounded-full shrink-0 object-cover cursor-pointer" 
+                            alt="Avatar" 
+                            onClick={() => router.push(`/${comment.userName}`)}
+                          />
                          <div className="flex flex-col flex-1">
                             <div>
-                              <span className="font-semibold mr-1.5">{comment.userName}</span>
+                              <span className="font-semibold mr-1.5 cursor-pointer hover:underline" onClick={() => router.push(`/${comment.userName}`)}>{comment.userName}</span>
                               <span>{comment.comment}</span>
                             </div>
                             <div className="flex gap-3 mt-2 text-[12px] text-[#8e8e8e] items-center">

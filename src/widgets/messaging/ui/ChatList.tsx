@@ -47,7 +47,7 @@ const ChatItem: React.FC<{
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <p className="font-medium text-sm text-zinc-900 truncate">{otherUserName || "User"}</p>
+        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{otherUserName || "User"}</p>
         {lastMessage && (
           <p className="text-zinc-500 text-xs truncate">
             {lastMessage.messageText} · {new Date(lastMessage.sendMassageDate).getHours()} ч.
@@ -74,7 +74,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
   const recommendedUsers = recommendedUsersResponse?.data || [];
 
   return (
-    <div className="w-full md:w-[350px] h-full flex flex-col border-r border-zinc-200 bg-white shrink-0 overflow-hidden">
+    <div className="w-full md:w-[350px] h-full flex flex-col border-r border-zinc-200 bg-white shrink-0">
       {/* Header */}
       <div className="p-5 flex items-center justify-between pb-3">
         <div className="flex items-center gap-1 cursor-pointer group">
@@ -89,56 +89,51 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
       {/* Notes / Recommended Users */}
       <div className="px-5 mb-6">
         <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {/* My Note */}
           <div className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
             <div className="relative">
               <div className="w-[72px] h-[72px] rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200 overflow-hidden">
                 <img
                   src={profile?.image ? `${urlImage}/${profile.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
                   className="w-full h-full object-cover opacity-50 grayscale group-hover:opacity-100 transition-opacity"
-                  alt=""
+                  alt="My Profile"
                 />
               </div>
-              <div className="absolute bottom-0 right-0 bg-[#0095F6] rounded-full border-2 border-white w-6 h-6 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">+</span>
+              <div className="absolute -top-1 -right-1 bg-white border border-zinc-200 rounded-2xl px-2 py-0.5 shadow-sm">
+                <span className="text-[10px] text-zinc-500">Ваша заметка</span>
               </div>
             </div>
-            <span className="text-[11px] text-zinc-500 mt-1">Заметка</span>
+            <span className="text-[11px] text-zinc-500">Ваша заме...</span>
           </div>
 
-          {recommendedUsers.slice(0, 10).map((user, i) => (
-            <div key={user.id || i} className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
-              <div className="relative">
-                <div className="w-[72px] h-[72px] rounded-full p-[2.5px] bg-gradient-to-tr from-[#FFD600] via-[#FF7A00] to-[#FF0069]">
-                  <div className="w-full h-full rounded-full bg-white p-[2px]">
-                    <div className="w-full h-full rounded-full bg-zinc-200 overflow-hidden">
-                      <img
-                        src={user.image ? `${urlImage}/${user.image}` : (user.userImage ? `${urlImage}/${user.userImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png")}
-                        className="w-full h-full object-cover"
-                        alt={user.userName}
-                      />
-                    </div>
+          {recommendedUsers.slice(0, 10).map((user: any) => (
+            <div key={user.id} className="flex flex-col items-center gap-1 min-w-[72px] cursor-pointer group">
+              <div className="w-[72px] h-[72px] rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 to-fuchsia-600">
+                <div className="w-full h-full rounded-full bg-white p-[2px]">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-zinc-200">
+                    <img
+                      src={user.image ? `${urlImage}/${user.image}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                      className="w-full h-full object-cover"
+                      alt={user.userName}
+                    />
                   </div>
                 </div>
               </div>
-              <span className="text-[11px] truncate w-16 text-center text-zinc-500 mt-1">{user.userName}</span>
+              <span className="text-[11px] text-zinc-600 truncate w-full text-center">{user.userName}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Messages List */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-5 py-2 flex items-center justify-between">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="px-5 mb-4 flex items-center justify-between">
           <span className="font-bold text-base text-zinc-900">Сообщения</span>
-          <span className="text-zinc-500 text-sm font-semibold cursor-pointer hover:text-zinc-400">Запросы</span>
+          <span className="text-sm font-semibold text-zinc-500 cursor-pointer hover:text-zinc-400">Запросы</span>
         </div>
-
-        <div className="mt-1">
+        
+        <div className="flex-1 overflow-y-auto">
           {isChatsLoading || isProfileLoading ? (
-            <div className="p-10 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0095F6] text-[#0095F6]"></div>
-            </div>
+            <div className="p-10 text-center text-zinc-400">Загрузка...</div>
           ) : chats.length > 0 ? (
             chats.map((chat) => (
               <ChatItem 
@@ -160,3 +155,5 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, onNewChat, sel
     </div>
   );
 };
+
+export default ChatList;
