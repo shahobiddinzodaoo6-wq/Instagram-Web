@@ -5,6 +5,7 @@ import { X, BellOff, ChevronRight, UserMinus, ShieldAlert, Trash2 } from "lucide
 import { Chat } from "@/src/entities/chat/model/types";
 import { urlImage } from "@/src/app/(auth)/accounts/login/token";
 import { useDeleteChat } from "@/src/entities/chat/api/chat.queries";
+import { useMyProfile } from "@/src/entities/user/api/user.queries";
 
 interface ChatInfoSidebarProps {
   chat: Chat;
@@ -15,6 +16,15 @@ interface ChatInfoSidebarProps {
 export const ChatInfoSidebar: React.FC<ChatInfoSidebarProps> = ({ chat, onClose, onChatDeleted }) => {
   const deleteChatMutation = useDeleteChat();
   const [muteNotifications, setMuteNotifications] = React.useState(false);
+  const { data: profileResponse } = useMyProfile();
+
+  const currentUserId = profileResponse?.data?.id;
+  const currentUserName = profileResponse?.data?.userName;
+  const isMeSender = (currentUserId && String(chat.sendUserId) === String(currentUserId)) || 
+                     (currentUserName && chat.sendUserName === currentUserName);
+  
+  const otherUserName = isMeSender ? chat.receiveUserName : chat.sendUserName;
+  const otherUserImage = isMeSender ? chat.receiveUserImage : chat.sendUserImage;
 
   const handleDeleteChat = () => {
     if (window.confirm("Вы уверены, что хотите удалить этот чат?")) {
@@ -57,14 +67,14 @@ export const ChatInfoSidebar: React.FC<ChatInfoSidebarProps> = ({ chat, onClose,
           <div className="flex items-center gap-3 cursor-pointer group">
             <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 shrink-0 border border-zinc-100">
               <img 
-                src={chat.receiveUserImage ? `${urlImage}/${chat.receiveUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+                src={otherUserImage ? `${urlImage}/${otherUserImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
                 className="w-full h-full object-cover" 
                 alt="" 
               />
             </div>
             <div className="flex flex-col overflow-hidden">
-              <p className="font-bold text-sm leading-tight truncate">{chat.receiveUserName}</p>
-              <p className="text-sm text-zinc-500 leading-tight truncate">habibullonzoda</p>
+              <p className="font-bold text-sm leading-tight truncate">{otherUserName}</p>
+              <p className="text-sm text-zinc-500 leading-tight truncate">{otherUserName.toLowerCase()}</p>
             </div>
           </div>
         </div>

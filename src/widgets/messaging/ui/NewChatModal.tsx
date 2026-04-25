@@ -99,7 +99,6 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
                       </div>
                     </div>
                     
-                    {/* Circular selection mark */}
                     <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
                       selectedUserId === user.id 
                         ? 'bg-[#0095F6] border-[#0095F6]' 
@@ -122,7 +121,6 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onC
           </div>
         </div>
 
-        {/* Footer with Chat Button */}
         <div className="p-4 shrink-0">
           <button 
             onClick={handleCreateChat}

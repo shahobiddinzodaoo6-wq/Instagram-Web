@@ -23,7 +23,6 @@ export const EditProfile = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    // Fetch current profile data
     const { data: userData, isLoading } = useQuery({
         queryFn: async () => {
             const { data } = await axiosRequest.get(`/UserProfile/get-my-profile`);
@@ -99,7 +98,6 @@ export const EditProfile = () => {
 
     return (
         <div className="max-w-[600px] mx-auto pt-8 px-4 pb-20">
-            {/* Breadcrumb */}
             <div className="flex items-center space-x-2 mb-8 text-sm md:text-base">
                 <button 
                     onClick={() => router.push('/profile')}
@@ -111,7 +109,6 @@ export const EditProfile = () => {
                 <span className="font-bold text-gray-900">Edit profile</span>
             </div>
 
-            {/* Profile Photo Card */}
             <div className="bg-gray-50/50 rounded-2xl p-4 mb-8 flex items-center justify-between border border-gray-100">
                 <div className="flex items-center space-x-4">
                     <div className="relative group">

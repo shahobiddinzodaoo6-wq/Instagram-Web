@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryClient } from "@tanstack/react-query";
 import { Providers } from "./provider";
+import { SplashScreen } from "../shared/ui/SplashScreen";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +19,8 @@ const geistMono = Geist_Mono({
 
 const queryClient = new QueryClient()
 
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,8 +32,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <SplashScreen />
         <Providers>
-        {children}
+          {children}
         </Providers>
       </body>
     </html>
