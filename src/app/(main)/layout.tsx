@@ -26,7 +26,7 @@ const Layout = ({ children } : any) => {
     return (
         <div className="flex h-screen bg-white overflow-hidden">
             <Sidebar />
-            <div className="flex-1 ml-[72px] xl:ml-[244px] transition-all duration-300 h-screen flex flex-col overflow-y-auto">
+            <div className={`flex-1 ml-[72px] xl:ml-[244px] transition-all duration-300 h-screen flex flex-col ${isDirectPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
                 <Toaster position="top-right" />
                 <main className={`flex-1 flex flex-col ${isDirectPage ? 'overflow-hidden' : 'max-w-[935px] mx-auto py-8 px-4 w-full'}`}>
                     {children}

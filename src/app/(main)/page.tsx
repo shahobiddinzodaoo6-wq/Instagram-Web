@@ -167,7 +167,12 @@ const StoryViewer = ({ stories, initialIndex, onClose }: { stories: any[], initi
 };
 
 const StorySection = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const [activeStoryIdx, setActiveStoryIdx] = useState<number | null>(null);
+  const [activeUserId, setActiveUserId] = useState<string | null>(null);
+  const [activeUserStories, setActiveUserStories] = useState<any[]>([]);
+  const [loadingStories, setLoadingStories] = useState(false);
 
   const { data: storiesObj } = useQuery({
     queryKey: ["getStories"],
@@ -178,7 +183,7 @@ const StorySection = () => {
   });
 
   // Also fetch my own stories
-  const { data: myStoriesData, refetch: refetchMyStories } = useQuery({
+  const { data: myStoriesData } = useQuery({
     queryKey: ["getMyStories"],
     queryFn: async () => {
       const { data } = await axiosRequest.get(`${api}/Story/get-my-stories`);
@@ -192,7 +197,6 @@ const StorySection = () => {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("Image", file);
-      // Try without PostId - server returns 500 for PostId=0
       const { data } = await axiosRequest.post(`${api}/Story/AddStories`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -218,10 +222,11 @@ const StorySection = () => {
       const { data: raw } = await axiosRequest.get(`${api}/Story/get-user-stories/${userId}`);
       console.log("get-user-stories RAW:", JSON.stringify(raw, null, 2));
       const stories = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : raw?.data ? [raw.data] : [];
-      console.log("User stories parsed:", stories);
       if (stories.length > 0) {
         setActiveUserStories(stories);
         setActiveUserId(userId);
+      } else {
+        message.info("У этого пользователя нет активных историй");
       }
     } catch (e) {
       console.error("Failed to fetch user stories", e);
@@ -235,10 +240,11 @@ const StorySection = () => {
       const { data: raw } = await axiosRequest.get(`${api}/Story/get-my-stories`);
       console.log("get-my-stories RAW:", JSON.stringify(raw, null, 2));
       const stories = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : raw?.data ? [raw.data] : [];
-      console.log("My stories parsed:", stories);
       if (stories.length > 0) {
         setActiveUserStories(stories);
         setActiveUserId("me");
+      } else {
+        message.info("У вас пока нет историй. Нажмите на +, чтобы добавить.");
       }
     } catch (e) {
       console.error("Failed to fetch my stories", e);
@@ -252,7 +258,6 @@ const StorySection = () => {
         {/* My story bubble */}
         <div className="flex flex-col items-center gap-1 min-w-[72px] shrink-0">
           <div className="relative">
-            {/* Click on avatar to VIEW your stories */}
             <div
               className={`w-[66px] h-[66px] rounded-full p-[2px] cursor-pointer ${myStoriesData && myStoriesData.length > 0 ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200'}`}
               onClick={openMyStories}
@@ -261,7 +266,6 @@ const StorySection = () => {
                 <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg" alt="You" className="rounded-full w-full h-full object-cover" />
               </div>
             </div>
-            {/* Plus button to ADD story */}
             <label className="absolute bottom-1 right-0 bg-[#0095f6] text-white rounded-full border-2 border-white w-[22px] h-[22px] flex items-center justify-center cursor-pointer z-10">
               <input type="file" accept="image/*" className="hidden" onChange={handleAddStory} disabled={addStoryMutation.isPending} />
               {addStoryMutation.isPending
@@ -278,8 +282,12 @@ const StorySection = () => {
           const uName = story.userName || story.author || "User";
           const hasStories = (story.stories && story.stories.length > 0) || story.hasStory === true || story.id;
           return (
-            <div key={story.id || story.storyId || idx} onClick={() => setActiveStoryIdx(idx)} className="flex flex-col items-center gap-1 cursor-pointer min-w-[72px]">
-              <div className={`w-[66px] h-[66px] rounded-full p-[2px] ${hasStoryHighlight ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200'}`}>
+            <div 
+              key={story.id || story.storyId || idx} 
+              onClick={() => story.userId ? openUserStories(story.userId) : null} 
+              className="flex flex-col items-center gap-1 cursor-pointer min-w-[72px]"
+            >
+              <div className={`w-[66px] h-[66px] rounded-full p-[2px] ${hasStories ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : 'bg-gray-200'}`}>
                 <div className="bg-white p-[2px] rounded-full w-full h-full">
                   <img src={avatarUrl} alt={uName} className="rounded-full w-full h-full object-cover" />
                 </div>
