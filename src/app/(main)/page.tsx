@@ -1,10 +1,11 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { axiosRequest } from "../(auth)/accounts/login/token";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile, ChevronRight, ChevronLeft, X, CheckCircle2, Trash2, Plus } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { message } from "antd";
 
 const api = "https://instagram-api.softclub.tj";
 const imageUrl = "https://instagram-api.softclub.tj/images"; 
