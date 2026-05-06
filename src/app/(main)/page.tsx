@@ -115,6 +115,10 @@ const StoryViewer = ({ stories, initialIndex, onClose }: { stories: any[], initi
         </button>
       )}
 
+
+
+
+
       {currentIndex < stories.length - 1 && (
         <button 
           className="absolute right-2 sm:right-[5%] md:right-[10%] lg:right-[25%] top-1/2 -translate-y-1/2 bg-white/20 p-2 sm:p-3 rounded-full text-white hover:bg-white/40 transition z-[110]" 
@@ -813,3 +817,14 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
+
+
+
+
+
+
+
+
+
