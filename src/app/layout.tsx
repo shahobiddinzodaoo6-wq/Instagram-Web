@@ -17,7 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 
+
 const queryClient = new QueryClient()
+
 
 
 
@@ -40,3 +42,7 @@ export default function RootLayout({
     </html>
   );
 }
+
+
+
+
