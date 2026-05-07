@@ -6,6 +6,10 @@ import Link from 'next/link'
 import { useUIStore } from "@/src/shared/model/ui.store"
 import { useState } from 'react'
 
+
+
+
+
 const Page = () => {
     const router = useRouter()
     const { showSplash } = useUIStore()
@@ -131,3 +135,8 @@ const Page = () => {
 }
 
 export default Page
+
+
+
+
+

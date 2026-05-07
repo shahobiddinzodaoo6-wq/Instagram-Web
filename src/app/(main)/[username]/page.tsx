@@ -8,3 +8,8 @@ const UserProfilePage = ({ params }: { params: Promise<{ username: string }> }) 
 };
 
 export default UserProfilePage;
+
+
+
+
+
