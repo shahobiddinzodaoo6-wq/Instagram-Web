@@ -10,6 +10,7 @@ export interface Chat {
   lastMessageDate?: string;
 }
 
+
 export interface Message {
   userId: string;
   userName: string;
@@ -21,8 +22,11 @@ export interface Message {
   file: string | null;
 }
 
+
 export interface ChatResponse<T> {
   data: T;
   errors: any[];
   statusCode: number;
 }
+
+

@@ -14,15 +14,10 @@ export const chatService = {
 
 
 
-
-
   createChat: async (receiverUserId: string): Promise<ChatResponse<any>> => {
     const { data } = await axiosRequest.post(`/Chat/create-chat?receiverUserId=${receiverUserId}`);
     return data;
   },
-
-
-
 
 
 
@@ -42,16 +37,10 @@ export const chatService = {
 
 
 
-
-
-
   deleteMessage: async (messageId: number): Promise<ChatResponse<any>> => {
     const { data } = await axiosRequest.delete(`/Chat/delete-message?massageId=${messageId}`);
     return data;
   },
-
-
-
 
 
 
@@ -61,8 +50,6 @@ export const chatService = {
     return data;
   },
 };
-
-
 
 
 

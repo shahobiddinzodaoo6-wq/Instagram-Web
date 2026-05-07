@@ -16,6 +16,8 @@ export const useRecommendedUsers = () => {
   });
 };
 
+
+
 export const useSearchHistories = () => {
   return useQuery({
     queryKey: ["users", "histories"],
@@ -23,9 +25,12 @@ export const useSearchHistories = () => {
   });
 };
 
+
 export const useMyProfile = () => {
   return useQuery({
     queryKey: ["users", "profile", "me"],
     queryFn: () => userService.getMyProfile(),
   });
 };
+
+
