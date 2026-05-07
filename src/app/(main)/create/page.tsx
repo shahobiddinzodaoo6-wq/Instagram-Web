@@ -14,6 +14,10 @@ interface PostFormValues {
   images: FileList | null;
 }
 
+
+
+
+
 const CreatePostPage = () => {
   const router = useRouter();
   const [step, setStep] = useState(1); // 1: Select, 2: Finalize
@@ -27,6 +31,10 @@ const CreatePostPage = () => {
       images: null,
     },
   });
+
+
+
+
 
   const createPost = useMutation({
     mutationKey: ["add-post"],
@@ -197,6 +205,8 @@ const CreatePostPage = () => {
                   />
                 </div>
 
+
+
                 {/* Extra Options */}
                 <div className="mt-4 flex flex-col border-t border-gray-100">
                   <div className="flex items-center justify-between p-4 text-gray-400">
@@ -229,3 +239,5 @@ const CreatePostPage = () => {
 };
 
 export default CreatePostPage;
+
+
