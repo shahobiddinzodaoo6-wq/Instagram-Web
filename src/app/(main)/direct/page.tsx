@@ -5,3 +5,7 @@ const DirectPage = () => {
 };
 
 export default DirectPage;
+
+
+
+

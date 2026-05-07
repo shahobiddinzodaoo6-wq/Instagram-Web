@@ -7,3 +7,9 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
 };
 
 export default PostPage;
+
+
+
+
+
+
