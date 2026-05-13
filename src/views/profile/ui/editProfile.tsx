@@ -11,7 +11,9 @@ export const EditProfile = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
     const fileInputRef = useRef<HTMLInputElement>(null);
+ 
     
+
     const [formData, setFormData] = useState({
         userName: '',
         firstName: '',
@@ -20,8 +22,12 @@ export const EditProfile = () => {
         gender: ''
     });
 
+
+
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+
 
     const { data: userData, isLoading } = useQuery({
         queryFn: async () => {
@@ -31,6 +37,8 @@ export const EditProfile = () => {
         queryKey: ['user-profile'],
     });
 
+
+    
     useEffect(() => {
         if (userData) {
             setFormData({
