@@ -8,10 +8,14 @@ import { QueryClient } from "@tanstack/react-query";
 import { Providers } from "./provider";
 import { SplashScreen } from "../shared/ui/SplashScreen";
 
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
