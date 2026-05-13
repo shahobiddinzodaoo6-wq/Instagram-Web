@@ -7,6 +7,8 @@ export const chatService = {
     return data;
   },
 
+
+
   getChatById: async (chatId: number): Promise<ChatResponse<Message[]>> => {
     const { data } = await axiosRequest.get(`/Chat/get-chat-by-id?chatId=${chatId}`);
     return data;
@@ -37,10 +39,12 @@ export const chatService = {
 
 
 
+
   deleteMessage: async (messageId: number): Promise<ChatResponse<any>> => {
     const { data } = await axiosRequest.delete(`/Chat/delete-message?massageId=${messageId}`);
     return data;
   },
+
 
 
 
@@ -50,6 +54,9 @@ export const chatService = {
     return data;
   },
 };
+
+
+
 
 
 
