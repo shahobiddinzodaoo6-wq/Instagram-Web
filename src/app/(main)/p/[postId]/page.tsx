@@ -1,3 +1,6 @@
+
+
+
 const PostPage = ({ params }: { params: { postId: string } }) => {
   return (
     <div>
@@ -5,6 +8,7 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
     </div>
   );
 };
+
 
 export default PostPage;
 
