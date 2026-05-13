@@ -79,6 +79,8 @@ const ReelItem = ({ reel, muted }: any) => {
         }
     };
 
+
+    
     const handleAddComment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!commentText.trim()) return;
@@ -101,6 +103,8 @@ const ReelItem = ({ reel, muted }: any) => {
         }
     };
 
+
+
     return (
         <div className="flex h-screen w-full snap-start items-center justify-center overflow-hidden relative bg-white">
             <div className="absolute inset-0 z-0">
@@ -110,6 +114,8 @@ const ReelItem = ({ reel, muted }: any) => {
                     alt="bg"
                 />
             </div>
+
+
 
             <div className={`relative z-10 flex h-full items-end justify-center transition-all duration-500 ${showComments ? "lg:gap-8" : "gap-4"}`}>
                 
@@ -121,6 +127,8 @@ const ReelItem = ({ reel, muted }: any) => {
                         className="h-full w-full cursor-pointer object-cover"
                         autoPlay loop muted={muted} playsInline
                     />
+
+
 
                     {!isPlaying && (
                         <div onClick={togglePlay} className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer ">
@@ -151,8 +159,6 @@ const ReelItem = ({ reel, muted }: any) => {
                         </div>
                     </div>
                 </div>
-
-
 
 
                 <div className="flex flex-col items-center gap-5 self-end pb-8">
