@@ -16,6 +16,8 @@ import {
 import { useReelsQuery } from "@/src/views/reels/api/reels.todo";
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 
+
+
 const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
 
 const ReelItem = ({ reel, muted }: any) => {
@@ -31,12 +33,16 @@ const ReelItem = ({ reel, muted }: any) => {
     const [comments, setComments] = useState<any[]>(reel.comments || []);
     const [commentText, setCommentText] = useState("");
 
+
+
     const togglePlay = () => {
         if (videoRef.current) {
             isPlaying ? videoRef.current.pause() : videoRef.current.play();
             setIsPlaying(!isPlaying);
         }
     };
+
+
 
     const handleLike = async () => {
         const prevLiked = isLiked;
@@ -53,6 +59,8 @@ const ReelItem = ({ reel, muted }: any) => {
         }
     };
 
+
+
     const handleFollow = async () => {
         const prev = isFollowing;
         setIsFollowing(!isFollowing);
@@ -67,6 +75,8 @@ const ReelItem = ({ reel, muted }: any) => {
         }
     };
 
+
+
     const handleBookmark = async () => {
         const prev = isBookmarked;
         setIsBookmarked(!isBookmarked);
@@ -78,8 +88,6 @@ const ReelItem = ({ reel, muted }: any) => {
             setIsBookmarked(prev);
         }
     };
-
-
     
     const handleAddComment = async (e: React.FormEvent) => {
         e.preventDefault();
