@@ -6,13 +6,16 @@ export function saveToken(token: string) {
     localStorage.setItem("token", token)
 }
 
+
 export const getToken = () => {
     return localStorage.getItem("token")
 }
 
+
 export const axiosRequest = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL
 })
+
 
 axiosRequest.interceptors.request.use(
     (config) => {
@@ -24,6 +27,7 @@ axiosRequest.interceptors.request.use(
     },
     (error) => Promise.reject(error)
 )
+
 
 axiosRequest.interceptors.response.use(
     (response) => response,
@@ -37,3 +41,5 @@ axiosRequest.interceptors.response.use(
         return Promise.reject(error)
     }
 )
+
+
