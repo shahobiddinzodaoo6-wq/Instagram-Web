@@ -9,12 +9,16 @@ import { Chat } from "@/src/entities/chat/model/types";
 import { useChats } from "@/src/entities/chat/api/chat.queries";
 import { useEffect } from "react";
 
+
+
 export const Messenger = () => {
   const { data: chatsResponse } = useChats();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [newChatId, setNewChatId] = useState<number | null>(null);
+
+
 
   useEffect(() => {
     if (newChatId && chatsResponse?.data) {
@@ -25,6 +29,8 @@ export const Messenger = () => {
       }
     }
   }, [newChatId, chatsResponse]);
+
+
 
   return (
     <div className="flex h-full w-full overflow-hidden">
@@ -54,6 +60,9 @@ export const Messenger = () => {
           }}
         />
       )}
+      
+
+
       
       <NewChatModal 
         isOpen={isModalOpen} 
