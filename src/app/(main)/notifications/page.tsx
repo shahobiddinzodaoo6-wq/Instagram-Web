@@ -5,9 +5,12 @@ import { axiosRequest } from '@/src/app/(auth)/accounts/login/token';
 import { Heart, UserPlus, MessageCircle, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+
 const NotificationsPage = () => {
     const router = useRouter();
     
+
+
     // Fetching subscribers as a proxy for "follow" notifications
     const { data: subscribers, isLoading } = useQuery({
         queryFn: async () => {
@@ -20,6 +23,8 @@ const NotificationsPage = () => {
         },
         queryKey: ['notifications-list'],
     });
+
+
 
     return (
         <div className="max-w-[600px] mx-auto bg-white min-h-screen">
@@ -86,6 +91,7 @@ const NotificationsPage = () => {
         </div>
     );
 };
+
 
 export default NotificationsPage;
 
