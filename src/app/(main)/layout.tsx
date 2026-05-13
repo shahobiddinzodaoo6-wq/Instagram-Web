@@ -5,10 +5,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'sileo';
 
+
+
 const Layout = ({ children } : any) => {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
+
+    
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -21,7 +25,11 @@ const Layout = ({ children } : any) => {
     const pathname = usePathname();
     const isDirectPage = pathname?.startsWith('/direct');
 
+
+
     if (loading) return <div className="flex items-center justify-center h-screen font-sans">Loading...</div>;
+
+
 
     return (
         <div className="flex h-screen bg-white overflow-hidden">
@@ -38,11 +46,4 @@ const Layout = ({ children } : any) => {
 
 
 export default Layout;
-
-
-
-
-
-
-
 
