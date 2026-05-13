@@ -5,10 +5,12 @@ import Link from "next/link"
 import { useUIStore } from "@/src/shared/model/ui.store"
 import { useState } from "react"
 
+
 const Page = () => {
     const router = useRouter()
     const { showSplash } = useUIStore()
     const [isLoading, setIsLoading] = useState(false)
+   
     
     const handleSubmit = async(event) => {   
         event.preventDefault()
@@ -33,6 +35,7 @@ const Page = () => {
         }
     }
 
+
     return (
         <div className="fixed inset-0 bg-white flex w-full font-sans text-black overflow-hidden select-none">
             {/* Left Side: Branding and Info */}
@@ -48,6 +51,7 @@ const Page = () => {
                         Посмотрите, какими моментами из жизни поделились ваши <span className="bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] bg-clip-text text-transparent">близкие друзья</span>.
                     </h1>
 
+
                     <div className="relative mt-4">
                         <img 
                             src="https://static.cdninstagram.com/rsrc.php/yN/r/-erGonz07kB.webp" 
@@ -57,6 +61,7 @@ const Page = () => {
                     </div>
                 </div>
             </div>
+
 
             {/* Right Side: Login Form */}
             <div className="w-full lg:w-[450px] flex flex-col items-center justify-center p-6 lg:p-10 h-full bg-white relative">
@@ -69,6 +74,8 @@ const Page = () => {
                         </Link>
                         <h2 className="text-xl font-bold">Войти в Instagram</h2>
                     </div>
+
+
 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
                         <div className="relative group">
@@ -93,6 +100,9 @@ const Page = () => {
                             />
                         </div>
 
+
+
+
                         <button 
                             type="submit" 
                             disabled={isLoading}
@@ -105,6 +115,9 @@ const Page = () => {
                             Забыли пароль?
                         </Link>
                     </form>
+
+
+
 
                     <div className="flex flex-col gap-3 mt-6 w-full">
                         <button type="button" className="flex items-center justify-center gap-2 border border-[#dbdbdb] py-2.5 rounded-[12px] text-sm font-semibold hover:bg-[#fafafa] transition-colors">
