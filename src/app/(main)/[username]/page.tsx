@@ -7,6 +7,8 @@ const UserProfilePage = ({ params }: { params: Promise<{ username: string }> }) 
   return <Profile username={username} />;
 };
 
+
+
 export default UserProfilePage;
 
 
