@@ -63,7 +63,7 @@ export const Messenger = () => {
       
 
 
-      
+
       <NewChatModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -75,3 +75,6 @@ export const Messenger = () => {
     </div>
   );
 };
+
+
+
