@@ -75,9 +75,11 @@ const Profile = ({ username }: { username?: string }) => {
     });
 
 
-    
+
     const handleDeleteClick = () => {
         if (!selectedPostId) return;
+
+
 
         Modal.confirm({
             title: 'Delete post?',
@@ -90,6 +92,8 @@ const Profile = ({ username }: { username?: string }) => {
             },
         });
     };
+
+
 
     const postMenuItems: MenuProps['items'] = [
         {
@@ -108,6 +112,8 @@ const Profile = ({ username }: { username?: string }) => {
         }
     ];
 
+
+
     // 1. Fetch User Profile (Either "my" or "target user")
     const { data: myProfile } = useQuery({
         queryFn: async () => {
@@ -116,6 +122,8 @@ const Profile = ({ username }: { username?: string }) => {
         },
         queryKey: ['my-profile'],
     });
+
+
 
     const { data: userData, isLoading: isProfileLoading } = useQuery({
         queryFn: async () => {
@@ -149,6 +157,8 @@ const Profile = ({ username }: { username?: string }) => {
                     // Endpoint may not exist – fall back to search result
                 }
 
+
+
                 const fallback = { ...foundUser, _resolvedId: id };
                 setIsFollowingLocal(fallback.isFollowing ?? false);
                 return fallback;
@@ -161,6 +171,8 @@ const Profile = ({ username }: { username?: string }) => {
         enabled: !username || !!myProfile,
     });
 
+
+
     // Safe helper: returns first truthy value as string, or null
     const getVal = (...args: any[]): string | null => {
         for (const v of args) {
@@ -168,6 +180,8 @@ const Profile = ({ username }: { username?: string }) => {
         }
         return null;
     };
+
+
 
     // If the `username` prop is passed, we are viewing SOMEONE ELSE's profile.
     // If no `username` prop, it's MY profile page (/profile).
@@ -182,6 +196,7 @@ const Profile = ({ username }: { username?: string }) => {
         userData?.Id,
         userData?.UserId
     ) ?? '';
+
 
     // ID to use for get-subscribers / get-subscriptions
     // Own profile ("/profile"): use myProfile's ID
