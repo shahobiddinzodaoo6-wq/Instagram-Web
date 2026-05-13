@@ -606,6 +606,9 @@ const PostItem = ({ post }: { post: any }) => {
             }
           }}
         />
+
+
+        
         {commentText.trim() && (
           <button
             className="text-[#0095f6] font-semibold text-[14px] ml-2 hover:text-[#00376b] disabled:opacity-40 transition"
