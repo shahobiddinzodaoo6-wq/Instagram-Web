@@ -622,13 +622,17 @@ const PostItem = ({ post }: { post: any }) => {
         )}
       </div>
 
+
+
       {/* ── Comments Modal ── */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/65 z-[100] flex items-center justify-center p-4 sm:p-10 cursor-default" onClick={() => setIsModalOpen(false)}>
           <button className="absolute top-4 right-4 text-white hover:opacity-70 z-[110]" onClick={() => setIsModalOpen(false)}>
             <X className="w-7 h-7" />
           </button>
-          
+
+
+
           <div 
             className="bg-white max-w-[1100px] w-full h-full max-h-[90vh] rounded-[4px] flex flex-col md:flex-row overflow-hidden shadow-2xl" 
             onClick={e => e.stopPropagation()}
@@ -659,6 +663,8 @@ const PostItem = ({ post }: { post: any }) => {
               )}
             </div>
 
+
+
             <div className="w-full md:w-[405px] flex flex-col h-[50vh] md:h-full bg-white shrink-0 border-l border-[#efefef]">
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#efefef] shrink-0">
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/${post.userName}`)}>
@@ -667,6 +673,8 @@ const PostItem = ({ post }: { post: any }) => {
                 </div>
                 <MoreHorizontal className="w-6 h-6 cursor-pointer text-[#262626]" />
               </div>
+
+
 
               <div className="flex-1 overflow-y-auto px-4 py-4 text-[14px] space-y-4">
                  {post.content && (
@@ -686,6 +694,8 @@ const PostItem = ({ post }: { post: any }) => {
                        </div>
                     </div>
                  )}
+
+
 
                  {post.comments?.map((comment: any, idx: number) => {
                     const cAvatar = getFullImageUrl(comment.userImage) || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
