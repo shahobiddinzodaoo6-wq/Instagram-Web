@@ -56,11 +56,10 @@ export const fetchReelsApi = async (
 
 
 
+
 export const useReelsQuery = (pageNumber = 1, pageSize = 10) => {
     return useQuery({
         queryKey: ["reels", pageNumber, pageSize],
         queryFn: () => fetchReelsApi(pageNumber, pageSize),
     });
 };
-
-
