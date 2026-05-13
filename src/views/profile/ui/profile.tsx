@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+
+
 import { Dropdown, MenuProps, Modal, message, QRCode } from 'antd';
 import {
   Settings,
@@ -26,6 +28,9 @@ import {
   Trash2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+
+
 
 const BASE_IMAGE_URL = "https://instagram-api.softclub.tj/images/";
 const Profile = ({ username }: { username?: string }) => {
@@ -69,6 +74,8 @@ const Profile = ({ username }: { username?: string }) => {
         }
     });
 
+
+    
     const handleDeleteClick = () => {
         if (!selectedPostId) return;
 
