@@ -1,4 +1,6 @@
 "use client"
+
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -16,11 +18,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
-
 const queryClient = new QueryClient()
-
-
 
 
 export default function RootLayout({
@@ -42,7 +40,4 @@ export default function RootLayout({
     </html>
   );
 }
-
-
-
 
