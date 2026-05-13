@@ -18,6 +18,7 @@ interface PostFormValues {
 
 
 
+
 const CreatePostPage = () => {
   const router = useRouter();
   const [step, setStep] = useState(1); // 1: Select, 2: Finalize
@@ -56,12 +57,17 @@ const CreatePostPage = () => {
     },
   });
 
+
+
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       processFiles(Array.from(files));
     }
   };
+
+
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -70,9 +76,13 @@ const CreatePostPage = () => {
     setIsDragging(true);
   };
 
+
+
   const handleDragLeave = () => {
     setIsDragging(false);
   };
+
+
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -83,12 +93,17 @@ const CreatePostPage = () => {
     }
   };
 
+
+
   const processFiles = (files: File[]) => {
     setSelectedFiles(files);
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviews(newPreviews);
     setStep(2);
   };
+
+
+
 
   const onSubmit = (data: PostFormValues) => {
     const formData = new FormData();
@@ -102,6 +117,8 @@ const CreatePostPage = () => {
     createPost.mutate(formData);
   };
 
+
+
   const goBack = () => {
     if (step === 2) {
       setStep(1);
@@ -112,11 +129,15 @@ const CreatePostPage = () => {
     }
   };
 
+
+
   return (
     <div className="flex min-h-[calc(100vh-40px)] items-center justify-center p-4">
       {/* Modal Container */}
       <div className="flex h-full max-h-[800px] min-h-[400px] w-full max-w-[800px] flex-col overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/5">
         
+
+
         {/* Header */}
         <div className="flex h-11 items-center justify-between border-b border-gray-200 px-4">
           <button onClick={goBack} className="p-1 hover:opacity-50 transition-opacity">
@@ -137,6 +158,8 @@ const CreatePostPage = () => {
             )}
           </div>
         </div>
+
+
 
         {/* Content Area */}
         <div className="flex flex-1 overflow-hidden">
@@ -188,6 +211,7 @@ const CreatePostPage = () => {
                 )}
               </div>
 
+
               {/* Sidebar / Info */}
               <div className="flex w-full flex-col border-l border-gray-200 md:w-[340px]">
                 {/* User Info */}
@@ -195,6 +219,7 @@ const CreatePostPage = () => {
                   <div className="h-7 w-7 rounded-full bg-gray-200" />
                   <span className="text-sm font-semibold">Ваш профиль</span>
                 </div>
+
 
                 {/* Caption Area */}
                 <div className="px-4">
