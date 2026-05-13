@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { axiosRequest } from "@/src/app/(auth)/accounts/login/token";
 
+
 export interface ReelComment {
     postCommentId: number;
     userId: string;
@@ -9,6 +10,7 @@ export interface ReelComment {
     dateCommented: string;
     comment: string;
 }
+
 
 export interface ReelData {
     userName: string;
@@ -25,6 +27,8 @@ export interface ReelData {
     comments: ReelComment[];
 }
 
+
+
 export interface ReelsResponse {
     pageNumber: number;
     pageSize: number;
@@ -32,6 +36,8 @@ export interface ReelsResponse {
     totalRecord: number;
     data: ReelData[];
 }
+
+
 
 export const fetchReelsApi = async (
     pageNumber: number = 1,
@@ -47,9 +53,14 @@ export const fetchReelsApi = async (
     return response.data;
 };
 
+
+
+
 export const useReelsQuery = (pageNumber = 1, pageSize = 10) => {
     return useQuery({
         queryKey: ["reels", pageNumber, pageSize],
         queryFn: () => fetchReelsApi(pageNumber, pageSize),
     });
 };
+
+
