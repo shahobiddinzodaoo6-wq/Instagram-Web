@@ -26,14 +26,12 @@ export const useSearchHistories = () => {
 };
 
 
+
+
 export const useMyProfile = () => {
   return useQuery({
     queryKey: ["users", "profile", "me"],
     queryFn: () => userService.getMyProfile(),
   });
 };
-
-
-
-
 
