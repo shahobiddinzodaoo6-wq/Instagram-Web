@@ -152,6 +152,9 @@ const ReelItem = ({ reel, muted }: any) => {
                     </div>
                 </div>
 
+
+
+
                 <div className="flex flex-col items-center gap-5 self-end pb-8">
                     <ActionButton 
                         icon={<Heart className={isLiked ? "fill-red-500 text-red-500" : ""} />} 
@@ -170,6 +173,8 @@ const ReelItem = ({ reel, muted }: any) => {
                     />
                     <MoreHorizontal className="text-zinc-400 cursor-pointer hover:text-black transition-colors" />
                 </div>
+
+
 
                 {showComments && (
                     <div className="absolute inset-0 z-[100] lg:relative lg:flex h-full lg:h-[95%] w-full lg:w-[350px] flex-col bg-white lg:rounded-xl animate-in slide-in-from-right duration-300 overflow-hidden shadow-2xl">
@@ -211,6 +216,8 @@ const ReelItem = ({ reel, muted }: any) => {
     );
 };
 
+
+
 const ActionButton = ({ icon, label, onClick }: any) => (
     <div className="flex flex-col items-center gap-1 group">
         <button 
@@ -223,6 +230,8 @@ const ActionButton = ({ icon, label, onClick }: any) => (
     </div>
 );
 
+
+
 export default function ReelsPage() {
     const { data, isLoading } = useReelsQuery(1, 10);
 
@@ -231,6 +240,8 @@ export default function ReelsPage() {
             <div className="w-10 h-10 border-[3px] border-zinc-800 border-t-white rounded-full animate-spin"></div>
         </div>
     );
+
+
 
     return (
         <main className="h-screen w-full overflow-y-scroll snap-y snap-mandatory bg-white no-scrollbar">
