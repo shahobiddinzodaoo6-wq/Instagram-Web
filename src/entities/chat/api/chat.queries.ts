@@ -8,6 +8,8 @@ export const useChats = () => {
   });
 };
 
+
+
 export const useChatMessages = (chatId: number | null) => {
   return useQuery({
     queryKey: ["messages", chatId],
@@ -29,6 +31,7 @@ export const useCreateChat = () => {
 };
 
 
+
 export const useSendMessage = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -40,6 +43,8 @@ export const useSendMessage = () => {
     },
   });
 };
+
+
 
 export const useDeleteMessage = () => {
   const queryClient = useQueryClient();
@@ -64,6 +69,8 @@ export const useDeleteChat = () => {
     },
   });
 };
+
+
 
 
 
