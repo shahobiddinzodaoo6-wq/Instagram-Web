@@ -38,7 +38,9 @@ export const EditProfile = () => {
     });
 
 
-    
+
+
+
     useEffect(() => {
         if (userData) {
             setFormData({
@@ -51,10 +53,14 @@ export const EditProfile = () => {
         }
     }, [userData]);
 
+
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
+
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -63,6 +69,8 @@ export const EditProfile = () => {
             setPreviewUrl(URL.createObjectURL(file));
         }
     };
+
+
 
     const updateProfileMutation = useMutation({
         mutationFn: async (updatedData: any) => {
@@ -77,6 +85,8 @@ export const EditProfile = () => {
                 PhoneNumber: userData?.phoneNumber || ''
             };
 
+
+            
             await axiosRequest.put(`/UserProfile/update-user-profile`, profilePayload);
             
             if (selectedFile) {
