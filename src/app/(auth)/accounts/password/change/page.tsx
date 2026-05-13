@@ -34,6 +34,10 @@ export const ForgotPassword = () => {
         mutate({ oldPassword, newPassword, confirmPassword });
     };
 
+    
+
+
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
             <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
@@ -73,7 +77,10 @@ export const ForgotPassword = () => {
     );
 };
 
+
 export default ForgotPassword;
+
+
 
 
 
