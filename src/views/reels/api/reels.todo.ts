@@ -29,6 +29,8 @@ export interface ReelData {
 
 
 
+
+
 export interface ReelsResponse {
     pageNumber: number;
     pageSize: number;
@@ -61,9 +63,3 @@ export const useReelsQuery = (pageNumber = 1, pageSize = 10) => {
         queryFn: () => fetchReelsApi(pageNumber, pageSize),
     });
 };
-
-
-
-
-
-
